@@ -4,8 +4,8 @@
 #include "entity.h"
 #include<vector>
 #include<GLFW/glfw3.h>
-#include<glm/glm.hpp>
-#include<glm/gtc/quaternion.hpp>
+#include "glm/glm.hpp"
+#include "glm/gtc/quaternion.hpp"
 
 namespace agl {
 class Camera

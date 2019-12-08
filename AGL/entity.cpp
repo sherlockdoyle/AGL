@@ -2,7 +2,7 @@
 #include "scene.h"
 #include "util.h"
 #include<sstream>
-#include<glm/gtc/matrix_transform.hpp>
+#include "glm/gtc/matrix_transform.hpp"
 
 namespace agl {
 BaseEntity::~BaseEntity() = default;
@@ -119,9 +119,6 @@ std::pair<std::string, std::string> Material::createShader(Entity *e)
     else if(e != nullptr)
     {
         int l = e->vertices.size() / 3;
-        float r1 = e->vertices[0], r2 = e->vertices[0],
-              g1 = e->vertices[1], g2 = e->vertices[1],
-              b1 = e->vertices[2], b2 = e->vertices[2];
         std::pair<GLfloat, GLfloat> mnmx;
         switch((int)ambient.w)
         {

@@ -4,7 +4,7 @@
 #include<vector>
 #include<GL/gl.h>
 #include<GLES3/gl32.h>
-#include<glm/glm.hpp>
+#include "glm/glm.hpp"
 #include "util.h"
 
 namespace agl {

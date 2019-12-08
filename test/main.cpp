@@ -1,10 +1,7 @@
 #include<GLES3/gl32.h>
 #include<GLFW/glfw3.h>
-#include<glm/glm.hpp>
-#include<glm/gtc/matrix_transform.hpp>
-#include<glm/gtx/rotate_vector.hpp>
 #include<sstream>
-#include "agl.h"
+#include "../AGL/agl.h"
 
 //int main()
 //{

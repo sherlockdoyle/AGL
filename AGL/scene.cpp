@@ -1,8 +1,8 @@
 #include "scene.h"
 #include "util.h"
-#include<glm/gtc/matrix_transform.hpp>
-#include<glm/gtx/rotate_vector.hpp>
-#include<glm/gtx/projection.hpp>
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/rotate_vector.hpp"
+#include "glm/gtx/projection.hpp"
 
 namespace agl {
 Scene::Scene(int width, int height, const char *name)
