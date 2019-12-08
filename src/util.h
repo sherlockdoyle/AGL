@@ -28,5 +28,6 @@ void saveImage(const char* path, int w, int h);
 #define AGL_SHADING_PHONG 3
 
 #define AGL_COLOR_POS2RGB_NORMED -1
+#define AGL_COLOR_CHECKERBOARD -2
 
 #endif // UTIL_H

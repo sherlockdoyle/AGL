@@ -102,6 +102,11 @@ void Scene::render()
             glUniform4fv(e->material.sID, 1, &e->material.specular[0]);
         }
         glBindVertexArray(e->VAO);
+        if(e->dynamic)
+        {
+            glBindBuffer(GL_ARRAY_BUFFER, e->VBO);
+            glBufferData(GL_ARRAY_BUFFER, e->vertices.size() * sizeof(GLfloat), &e->vertices[0], GL_DYNAMIC_DRAW);
+        }
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, e->EBO);
         glDrawElements(GL_TRIANGLES, e->indices.size(), GL_UNSIGNED_INT, 0);
     }

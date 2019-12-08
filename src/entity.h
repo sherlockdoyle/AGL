@@ -42,6 +42,7 @@ class Entity: virtual public BaseEntity
 public:
     GLuint VAO = 0, VBO = 0, EBO = 0;
 //           polyMode = GL_FILL;
+    bool dynamic = false;
     std::vector<GLfloat> vertices;
     std::vector<GLuint> indices;
     glm::vec3 pos;

@@ -127,20 +127,24 @@ void showFPS(GLFWwindow *pWindow)
 int main()
 {
     agl::Scene scene(640, 480);
-    scene.camera.lookAt(-1,0,0);
-    agl::Entity cube = agl::unitCube(), c2 = agl::unitSphere(40, 40);
-    cube.material.ambient.r = 1;
-    c2.material.ambient = glm::vec4(-1, -1, -1, AGL_COLOR_POS2RGB_NORMED);
+//    scene.camera.lookAt(-1,0,0);
+    agl::Entity cube = agl::cuboid(5,5,1), c2 = agl::unitSphere(40, 40);
+//    agl::subdivideVertices(cube);
+//    agl::normalizeVertices(cube);
+//    cube.material.ambient.r = 1;
+    cube.material.ambient = glm::vec4(-1, -1, 0, AGL_COLOR_CHECKERBOARD);
     scene.add(cube);
-    scene.add(c2);
+//    scene.add(c2);
     c2.translate(-1,0,0);
-    c2.scale(2,2,2);
+//    cube.scale(2,2,2);
     scene.prepare();
     int i=0;
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glLineWidth(5);
     while(glfwWindowShouldClose(scene.window) == 0)
     {
-        cube.rotate(0.01, glm::vec3(1, 0, 0));
-        c2.rotate(-0.01, glm::vec3(2, 3, 5));
+//        cube.rotate(0.01, glm::vec3(1, 0, 0));
+        cube.rotate(-0.01, glm::vec3(2, 3, 5));
         scene.render();
 //        std::stringstream path;
 //        path << "../img/img" << i++ << ".ppm";
