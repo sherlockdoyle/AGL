@@ -1,13 +1,12 @@
 #include "entity.h"
 #include "scene.h"
 #include "util.h"
-#include<sstream>
 #include "glm/gtc/matrix_transform.hpp"
 
 namespace agl {
 BaseEntity::~BaseEntity() = default;
 
-Entity::Entity(const glm::vec3 &pos): pos(pos){}
+Entity::Entity(const glm::vec3 &pos): position(pos){}
 Entity::~Entity()
 {
     glDeleteVertexArrays(1, &VAO);
@@ -32,16 +31,49 @@ void Entity::scale(const glm::vec3 &s)
 }
 void Entity::scale(float sx, float sy, float sz)
 {
+    if(std::isnan(sy))
+        sz = sy = sx;
+    else if(std::isnan(sz))
+        sz = 1;
     transform(glm::scale(glm::mat4(1), glm::vec3(sx, sy, sz)));
 }
 void Entity::transform(const glm::mat4 &m)
 {
     model = m * model;
 }
+void Entity::applyTransform()
+{
+    glm::vec4 transformed;
+    for(int i=0, l=vertices.size(); i<l; i+=3)
+    {
+        transformed = model * glm::vec4(vertices[i], vertices[i+1], vertices[i+2], 1);
+        vertices[i  ] = transformed.x;
+        vertices[i+1] = transformed.y;
+        vertices[i+2] = transformed.z;
+    }
+    model = glm::mat4();
+}
 void Entity::add(BaseEntity &e)
 {
     children.push_back(&e);
     e.parent = this;
+}
+void Entity::mergeData()
+{
+    bool norm = !normals.empty();
+    merged.clear();
+    for(int i=0, l=vertices.size(); i<l; i+=3)
+    {
+        merged.push_back(vertices[i  ]);
+        merged.push_back(vertices[i+1]);
+        merged.push_back(vertices[i+2]);
+        if(norm)
+        {
+            merged.push_back(normals[i  ]);
+            merged.push_back(normals[i+1]);
+            merged.push_back(normals[i+2]);
+        }
+    }
 }
 void Entity::createBuffers()
 {
@@ -52,10 +84,22 @@ void Entity::createBuffers()
     glDeleteBuffers(1, &VBO);
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, merged.size() * sizeof(GLfloat), &merged[0], dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    bool norm = !normals.empty(), uv = false;
+    int stride = norm ? uv ? 8 : 6 : uv ? 5 : 3;
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
+    if(norm)
+    {
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+        glEnableVertexAttribArray(1);
+    }
+    if(uv)
+    {
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), (void*)((norm ? 6 : 3) * sizeof(GLfloat)));
+        glEnableVertexAttribArray(2);
+    }
 
     glDeleteBuffers(1, &EBO);
     glGenBuffers(1, &EBO);
@@ -65,108 +109,26 @@ void Entity::createBuffers()
 glm::mat4 Entity::getMatM()
 {
     if(parent == nullptr)
-        return model;
+        return glm::translate(glm::mat4(1), position) * model;
     else
-        return parent->getMatM() * model;
+        return glm::translate(glm::mat4(1), position) * (parent->getMatM() * model);
 }
 
+Material::Material() = default;
+Material::Material(float ar, float ag, float ab, float dr, float dg, float db, float sr, float sg, float sb, float sn):
+    ambient(ar, ag, ab, 1), diffuse(dr, dg, db, 1), specular(sr, sg, sb, 1), shininess(sn) {}
 Material::~Material()
 {
-    delete texture;
     glDeleteProgram(progID);
+    delete texture;
 }
-namespace {
-std::pair<GLfloat, GLfloat> getMinMax(std::vector<GLfloat> &vertices, int length, int stride, int offset)
+void Material::setColor(glm::vec4 color)
 {
-    float mn = vertices[offset], mx = vertices[offset];
-    for(int i=1; i<length; ++i)
-    {
-        mn = std::min(mn, vertices[i*stride+offset]);
-        mx = std::max(mx, vertices[i*stride+offset]);
-    }
-    return std::pair<GLfloat, GLfloat>(mn, mx);
+    emission = ambient = diffuse = specular = color;
 }
-}
-std::pair<std::string, std::string> Material::createShader(Entity *e)
+void Material::setColor(float r, float g, float b, float a)
 {
-    std::stringstream vs, fs;
-    vs << "#version " << AGL_GLVERSION_MAJOR << AGL_GLVERSION_MINOR << "0 core\n"
-          "layout(location = 0) in vec3 vertexPos;\n"
-          "uniform mat4 MVP;\n";
-    if(lightsEnabled)
-        vs << "uniform mat4 N;\n";
-    vs << "out vec3 pos;\n";
-    if(lightsEnabled)
-        vs << "out vec3 norm;\n";
-    vs << "void main()\n{\n"
-          "    gl_Position = MVP * vec4(vertexPos, 1);\n"
-          "    pos = vertexPos;\n";
-    if(lightsEnabled)
-        vs << "    norm = N * vertexPos;\n";
-    vs << "}";
-
-    fs << "#version " << AGL_GLVERSION_MAJOR << AGL_GLVERSION_MINOR << "0 core\n"
-          "in vec3 pos;\n";
-    if(lightsEnabled)
-        fs << "in vec3 norm;\n";
-    if(ambient.w >= 0)
-        fs << "uniform vec4 ambient;\n";
-    fs << "out vec4 color;\n";
-    fs << "void main()\n{\n";
-    if(lightsEnabled);
-    else if(ambient.w >= 0)
-        fs << "    color = ambient;\n";
-    else if(e != nullptr)
-    {
-        int l = e->vertices.size() / 3;
-        std::pair<GLfloat, GLfloat> mnmx;
-        switch((int)ambient.w)
-        {
-        case AGL_COLOR_POS2RGB_NORMED:
-            fs << "    color = vec4(";
-            if(ambient.r == -1)
-            {
-                mnmx = getMinMax(e->vertices, l, 3, 0);
-                fs << "(pos.r - " << mnmx.first << ") / " << mnmx.second - mnmx.first << ", ";
-            }
-            else
-                fs << ambient.r << ", ";
-            if(ambient.g == -1)
-            {
-                mnmx = getMinMax(e->vertices, l, 3, 1);
-                fs << "(pos.g - " << mnmx.first << ") / " << mnmx.second - mnmx.first << ", ";
-            }
-            else
-                fs << ambient.g << ", ";
-            if(ambient.b == -1)
-            {
-                mnmx = getMinMax(e->vertices, l, 3, 2);
-                fs << "(pos.b - " << mnmx.first << ") / " << mnmx.second - mnmx.first << ", ";
-            }
-            else
-                fs << ambient.b << ", ";
-            fs << "1);\n";
-            break;
-        case AGL_COLOR_CHECKERBOARD:
-            std::pair<char, char> coord;
-            if(ambient.x == -1)
-            {
-                coord.first = 'x';
-                coord.second = ambient.y == -1 ? 'y' : 'z';
-            }
-            else
-            {
-                coord.first = 'y';
-                coord.second = 'z';
-            }
-            fs << "    float f = mod(floor(pos." << coord.first << ") + floor(pos." << coord.second << "), 2);\n"
-                  "    color = vec4(f, f, f, 1);\n";
-        }
-    }
-    else
-        fs << "    color = vec4(0.9, 0.9, 0.9, 1);\n";
-    fs << "}";
-    return std::pair<std::string, std::string>(vs.str(), fs.str());
+    emission = ambient = diffuse = specular = glm::vec4(r, g, b, a);
 }
 void Material::setShader(std::string vertexShader, std::string fragmentShader)
 {
@@ -177,11 +139,51 @@ void Material::setShader(std::string vertexShader, std::string fragmentShader)
         aID   = glGetUniformLocation(progID, "ambient");
         if(lightsEnabled)  // only calculate if lights enabled
         {
-            nID   = glGetUniformLocation(progID, "N");
-            eID   = glGetUniformLocation(progID, "emission");
-            dID   = glGetUniformLocation(progID, "diffuse");
-            sID   = glGetUniformLocation(progID, "specular");
+            mID = glGetUniformLocation(progID, "M");
+            nID = glGetUniformLocation(progID, "N");
+            eID = glGetUniformLocation(progID, "emission");
+            dID = glGetUniformLocation(progID, "diffuse");
+            sID = glGetUniformLocation(progID, "specular");
+            gID = glGetUniformLocation(progID, "shininess");
+            vID = glGetUniformLocation(progID, "vpos");
         }
     }
 }
+
+Light::Light(const glm::vec3 &pos, glm::vec4 color): ambient(color), diffuse(color), specular(color), position(pos) {}
+Light::Light(const glm::vec3 &pos, float r, float g, float b, float a): ambient(r, g, b, a), diffuse(r, g, b, a),
+    specular(r, g, b, a), position(pos) {}
+void Light::setColor(glm::vec4 color)
+{
+    ambient = diffuse = specular = color;
+}
+void Light::setColor(float r, float g, float b, float a)
+{
+    ambient = diffuse = specular = glm::vec4(r, g, b, a);
+}
+
+const Material Material::emerald = Material(0.0215, 0.1745, 0.0215, 0.07568, 0.61424, 0.07568, 0.633, 0.727811, 0.633, 76.8);
+const Material Material::jade = Material(0.135, 0.2225, 0.1575, 0.54, 0.89, 0.63, 0.316228, 0.316228, 0.316228, 12.8);
+const Material Material::obsidian = Material(0.05375, 0.05, 0.06625, 0.18275, 0.17, 0.22525, 0.332741, 0.328634, 0.346435, 38.4);
+const Material Material::pearl = Material(0.25, 0.20725, 0.20725, 1, 0.829, 0.829, 0.296648, 0.296648, 0.296648, 11.264);
+const Material Material::ruby = Material(0.1745, 0.01175, 0.01175, 0.61424, 0.04136, 0.04136, 0.727811, 0.626959, 0.626959, 76.8);
+const Material Material::turquoise = Material(0.1, 0.18725, 0.1745, 0.396, 0.74151, 0.69102, 0.297254, 0.30829, 0.306678, 12.8);
+const Material Material::brass = Material(0.329412, 0.223529, 0.027451, 0.780392, 0.568627, 0.113725, 0.992157, 0.941176, 0.807843, 27.89743616);
+const Material Material::bronze = Material(0.2125, 0.1275, 0.054, 0.714, 0.4284, 0.18144, 0.393548, 0.271906, 0.166721, 25.6);
+const Material Material::chrome = Material(0.25, 0.25, 0.25, 0.4, 0.4, 0.4, 0.774597, 0.774597, 0.774597, 76.8);
+const Material Material::copper = Material(0.19125, 0.0735, 0.0225, 0.7038, 0.27048, 0.0828, 0.256777, 0.137622, 0.086014, 12.8);
+const Material Material::gold = Material(0.24725, 0.1995, 0.0745, 0.75164, 0.60648, 0.22648, 0.628281, 0.555802, 0.366065, 51.2);
+const Material Material::silver = Material(0.19225, 0.19225, 0.19225, 0.50754, 0.50754, 0.50754, 0.508273, 0.508273, 0.508273, 51.2);
+const Material Material::black_plastic = Material(0, 0, 0, 0.01, 0.01, 0.01, 0.50, 0.50, 0.50, 32);
+const Material Material::cyan_plastic = Material(0, 0.1, 0.06, 0, 0.50980392, 0.50980392, 0.50196078, 0.50196078, 0.50196078, 32);
+const Material Material::green_plastic = Material(0, 0, 0, 0.1, 0.35, 0.1, 0.45, 0.55, 0.45, 32);
+const Material Material::red_plastic = Material(0, 0, 0, 0.5, 0, 0, 0.7, 0.6, 0.6, 32);
+const Material Material::white_plastic = Material(0, 0, 0, 0.55, 0.55, 0.55, 0.70, 0.70, 0.70, 32);
+const Material Material::yellow_plastic = Material(0, 0, 0, 0.5, 0.5, 0, 0.60, 0.60, 0.50, 32);
+const Material Material::black_rubber = Material(0.02, 0.02, 0.02, 0.01, 0.01, 0.01, 0.4, 0.4, 0.4, 10);
+const Material Material::cyan_rubber = Material(0, 0.05, 0.05, 0.4, 0.5, 0.5, 0.04, 0.7, 0.7, 10);
+const Material Material::green_rubber = Material(0, 0.05, 0, 0.4, 0.5, 0.4, 0.04, 0.7, 0.04, 10);
+const Material Material::red_rubber = Material(0.05, 0, 0, 0.5, 0.4, 0.4, 0.7, 0.04, 0.04, 10);
+const Material Material::white_rubber = Material(0.05, 0.05, 0.05, 0.5, 0.5, 0.5, 0.7, 0.7, 0.7, 10);
+const Material Material::yellow_rubber = Material(0.05, 0.05, 0, 0.5, 0.5, 0.4, 0.7, 0.7, 0.04, 10);
 }

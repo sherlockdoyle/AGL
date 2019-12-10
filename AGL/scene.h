@@ -40,9 +40,11 @@ public:
 class Scene
 {
 public:
-    GLFWwindow* window;
+    int width, height;
+    glm::mat4 projection;
     Camera camera;
     std::vector<BaseEntity*> children;
+    GLFWwindow* window;
 
     Scene(int width=640, int height=480, const char *name="AGL");
     ~Scene();
@@ -56,14 +58,13 @@ public:
                        GLFWwindowsizefun windowSizeCallback=nullptr);
     void setBGcolor(float r=0, float g=0, float b=0, float a=0);
     void add(BaseEntity &e);
+    void enableLights(bool enable=true);
     void prepare();
     void render();
     glm::mat4 getMatVP();
 
 private:
-    int width, height;
     glm::vec4 bgcolor;
-    glm::mat4 projection;
     std::vector<Entity*> entities;
     std::vector<Light*> lights;
 
@@ -73,6 +74,7 @@ private:
 
 void defKeyCB(GLFWwindow* window, int key, int scancode, int action, int mods);
 void defScrollCB(GLFWwindow* window, double xoffset, double yoffset);
+void defWindowSizeCB(GLFWwindow* window, int w, int h);
 }
 
 #endif // SCENE_H

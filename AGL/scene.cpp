@@ -3,6 +3,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/rotate_vector.hpp"
 #include "glm/gtx/projection.hpp"
+#include<sstream>
 
 namespace agl {
 Scene::Scene(int width, int height, const char *name)
@@ -20,7 +21,7 @@ Scene::Scene(int width, int height, const char *name)
         printf("Could not create window.");
         break;
     }
-    setController(defKeyCB, nullptr, nullptr, defScrollCB, nullptr);
+    setController(defKeyCB, nullptr, nullptr, defScrollCB, defWindowSizeCB);
 }
 Scene::~Scene()
 {
@@ -69,6 +70,21 @@ void Scene::add(BaseEntity &e)
 {
     children.push_back(&e);
 }
+namespace {
+void enableLight(std::vector<BaseEntity*> &children, bool enable)
+{
+    for(BaseEntity *e: children)
+        if(Entity *ent = dynamic_cast<Entity*>(e))
+        {
+            ent->material.lightsEnabled = enable;
+            enableLight(ent->children, enable);
+        }
+}
+}
+void Scene::enableLights(bool enable)
+{
+    enableLight(children, enable);
+}
 void Scene::prepare()
 {
     glClearColor(bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a);
@@ -79,33 +95,67 @@ void Scene::prepare()
     getAllEntity(children);
     for(Entity *e: entities)
     {
-        std::pair<std::string, std::string> shaders = e->material.createShader(e);
+        std::pair<std::string, std::string> shaders = e->material.createShader(e, lights);
         e->material.setShader(shaders.first, shaders.second);
+        e->mergeData();
         e->createBuffers();
     }
 }
 void Scene::render()
 {
+    std::stringstream lt;
     glm::mat4 vp = getMatVP();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for(Entity *e: entities)
     {
 //        glPolygonMode(GL_FRONT_AND_BACK, e->polyMode);
-        glm::mat4 mvp = vp * e->getMatM();
         glUseProgram(e->material.progID);
+        glm::mat4 model = e->getMatM(),
+                mvp = vp * model;
         glUniformMatrix4fv(e->material.mvpID, 1, GL_FALSE, &mvp[0][0]);
         glUniform4fv(e->material.aID, 1, &e->material.ambient[0]);
         if(e->material.lightsEnabled)
         {
+            glUniformMatrix3fv(e->material.mID, 1, GL_FALSE, &glm::mat3(model)[0][0]);
+            glUniformMatrix3fv(e->material.nID, 1, GL_FALSE, &glm::mat3(glm::transpose(glm::inverse(model)))[0][0]);
             glUniform4fv(e->material.eID, 1, &e->material.emission[0]);
             glUniform4fv(e->material.dID, 1, &e->material.diffuse[0]);
             glUniform4fv(e->material.sID, 1, &e->material.specular[0]);
+            glUniform1f(e->material.gID, e->material.shininess);
+            glUniform3fv(e->material.vID, 1, &camera._pos[0]);
+            for(int i=0, l=lights.size(); i<l; ++i)
+            {
+                std::stringstream().swap(lt); lt << "lights[" << i << "].ambient";
+                glUniform4fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->ambient[0]);
+                std::stringstream().swap(lt); lt << "lights[" << i << "].diffuse";
+                glUniform4fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->diffuse[0]);
+                std::stringstream().swap(lt); lt << "lights[" << i << "].specular";
+                glUniform4fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->specular[0]);
+                std::stringstream().swap(lt); lt << "lights[" << i << "].position";
+                glUniform3fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->position[0]);
+                std::stringstream().swap(lt); lt << "lights[" << i << "].halfVector";
+                glUniform3fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->halfVector[0]);
+                std::stringstream().swap(lt); lt << "lights[" << i << "].spotDirection";
+                glUniform3fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->spotDirection[0]);
+                std::stringstream().swap(lt); lt << "lights[" << i << "].spotExponent";
+                glUniform1f(glGetUniformLocation(e->material.progID, lt.str().c_str()), lights[i]->spotExponent);
+                std::stringstream().swap(lt); lt << "lights[" << i << "].spotCutoff";
+                glUniform1f(glGetUniformLocation(e->material.progID, lt.str().c_str()), lights[i]->spotCutoff);
+                std::stringstream().swap(lt); lt << "lights[" << i << "].spotCosCutoff";
+                glUniform1f(glGetUniformLocation(e->material.progID, lt.str().c_str()), lights[i]->spotCosCutoff);
+                std::stringstream().swap(lt); lt << "lights[" << i << "].constantAttenuation";
+                glUniform1f(glGetUniformLocation(e->material.progID, lt.str().c_str()), lights[i]->constantAttenuation);
+                std::stringstream().swap(lt); lt << "lights[" << i << "].linearAttenuation";
+                glUniform1f(glGetUniformLocation(e->material.progID, lt.str().c_str()), lights[i]->linearAttenuation);
+                std::stringstream().swap(lt); lt << "lights[" << i << "].quadraticAttenuation";
+                glUniform1f(glGetUniformLocation(e->material.progID, lt.str().c_str()), lights[i]->quadraticAttenuation);
+            }
         }
         glBindVertexArray(e->VAO);
         if(e->dynamic)
         {
             glBindBuffer(GL_ARRAY_BUFFER, e->VBO);
-            glBufferData(GL_ARRAY_BUFFER, e->vertices.size() * sizeof(GLfloat), &e->vertices[0], GL_DYNAMIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, e->merged.size() * sizeof(GLfloat), &e->merged[0], GL_DYNAMIC_DRAW);
         }
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, e->EBO);
         glDrawElements(GL_TRIANGLES, e->indices.size(), GL_UNSIGNED_INT, 0);
@@ -293,39 +343,51 @@ void defKeyCB(GLFWwindow *window, int key, int scancode, int action, int mods)
     // Q: Camera down
     // E: Camera up
     // 0: Reset camera
+    // Arrow keys: Rotate camera
     Camera &camera = static_cast<Scene*>(glfwGetWindowUserPointer(window))->camera;
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);
     if(key == GLFW_KEY_0 || key == GLFW_KEY_KP_0)
         camera.view = glm::lookAt(camera._pos=glm::vec3(3, 4, 5), camera._lookAt=glm::vec3(0), camera._up=glm::vec3(0, 1, 0));
-    if(key == GLFW_KEY_UP || key == GLFW_KEY_W)
+    glm::vec3 d = camera._pos - camera._lookAt;
+    if(key == GLFW_KEY_W)
     {
-        glm::vec3 d = camera._pos - camera._lookAt;
         d.y = 0;
         d = glm::normalize(d) * 0.1f;
         camera.view = glm::lookAt(camera._pos -= d, camera._lookAt -= d, camera._up);
     }
-    if(key == GLFW_KEY_DOWN || key == GLFW_KEY_S)
+    if(key == GLFW_KEY_S)
     {
-        glm::vec3 d = camera._pos - camera._lookAt;
         d.y = 0;
         d = glm::normalize(d) * 0.1f;
         camera.view = glm::lookAt(camera._pos += d, camera._lookAt += d, camera._up);
     }
-    if(key == GLFW_KEY_LEFT || key == GLFW_KEY_A)
+    if(key == GLFW_KEY_A)
     {
-        glm::vec3 d = camera._pos - camera._lookAt;
         d.y = d.x; d.x = d.z; d.z = -d.y; d.y = 0;
         d = glm::normalize(d) * 0.1f;
         camera.view = glm::lookAt(camera._pos -= d, camera._lookAt -= d, camera._up);
     }
-    if(key == GLFW_KEY_RIGHT || key == GLFW_KEY_D)
+    if(key == GLFW_KEY_D)
     {
-        glm::vec3 d = camera._pos - camera._lookAt;
         d.y = d.x; d.x = d.z; d.z = -d.y; d.y = 0;
         d = glm::normalize(d) * 0.1f;
         camera.view = glm::lookAt(camera._pos += d, camera._lookAt += d, camera._up);
     }
+    if(key == GLFW_KEY_UP)
+    {
+        d.y = d.x; d.x = d.z; d.z = -d.y; d.y = 0;
+        camera.rotate(0.03, glm::normalize(d), false);
+    }
+    if(key == GLFW_KEY_DOWN)
+    {
+        d.y = d.x; d.x = d.z; d.z = -d.y; d.y = 0;
+        camera.rotate(-0.03, glm::normalize(d), false);
+    }
+    if(key == GLFW_KEY_LEFT)
+        camera.rotateY(0.03, false);
+    if(key == GLFW_KEY_RIGHT)
+        camera.rotateY(-0.03, false);
     if(key == GLFW_KEY_Q)
     {
         camera._pos.y -= 0.1;
@@ -343,9 +405,17 @@ void defScrollCB(GLFWwindow *window, double xoffset, double yoffset)
 {
     // Scroll: rotate camera
     Camera &camera = static_cast<Scene*>(glfwGetWindowUserPointer(window))->camera;
-    camera.rotateY(-0.05 * xoffset, false);
+    camera.rotateY(-0.03 * xoffset, false);
     glm::vec3 d = camera._pos - camera._lookAt;
     d.y = d.x; d.x = d.z; d.z = -d.y; d.y = 0;
-    camera.rotate(-0.05 * yoffset, glm::normalize(d), false);
+    camera.rotate(-0.03 * yoffset, glm::normalize(d), false);
+}
+void defWindowSizeCB(GLFWwindow *window, int w, int h)
+{
+    Scene *scene = static_cast<Scene*>(glfwGetWindowUserPointer(window));
+    glViewport(0, 0, w, h);
+    scene->width = w;
+    scene->height = h;
+    scene->projection = glm::perspective(glm::radians(45.f), float(w)/h, 0.1f, 100.f);
 }
 }
