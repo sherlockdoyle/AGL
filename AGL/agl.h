@@ -4,6 +4,6 @@
 #include "util.h"
 #include "scene.h"
 #include "entity.h"
-#include "basic_shape.h"
+#include "shapes.h"
 
 #endif // AGL_H

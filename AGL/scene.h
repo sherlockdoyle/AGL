@@ -45,6 +45,8 @@ public:
     Camera camera;
     std::vector<BaseEntity*> children;
     GLFWwindow* window;
+    std::vector<Entity*> entities;
+    std::vector<Light*> lights;
 
     Scene(int width=640, int height=480, const char *name="AGL");
     ~Scene();
@@ -65,8 +67,6 @@ public:
 
 private:
     glm::vec4 bgcolor;
-    std::vector<Entity*> entities;
-    std::vector<Light*> lights;
 
     int setupGL(const char *name);
     void getAllEntity(std::vector<BaseEntity*> &children);

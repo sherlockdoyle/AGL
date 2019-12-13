@@ -1,4 +1,4 @@
-#include "basic_shape.h"
+#include "shapes.h"
 #include<queue>
 
 namespace agl {
@@ -20,56 +20,46 @@ Entity tetrahedron()
 Entity cube(bool calcNorm)
 {
     Entity e;
+    int verts[] = {-1,-1,-1,    -1,-1, 1,    -1, 1,-1,    -1, 1, 1,
+                    1,-1,-1,     1,-1, 1,     1, 1,-1,     1, 1, 1},
+        idx[] = {0, 1, 2,     1, 3, 2,  // left
+                 4, 6, 5,     5, 6, 7,  // right
+                 0, 4, 1,     1, 4, 5,  // bottom
+                 3, 7, 6,     2, 3, 6,  // top
+                 0, 2, 4,     2, 6, 4,  // back
+                 1, 5, 3,     5, 7, 3}; // front
     if(calcNorm)
     {
-        int verts[] = {-1,-1,-1,    -1,-1,-1,    -1,-1,-1,
-                       -1,-1, 1,    -1,-1, 1,    -1,-1, 1,
-                       -1, 1,-1,    -1, 1,-1,    -1, 1,-1,
-                       -1, 1, 1,    -1, 1, 1,    -1, 1, 1,
-                        1,-1,-1,     1,-1,-1,     1,-1,-1,
-                        1,-1, 1,     1,-1, 1,     1,-1, 1,
-                        1, 1,-1,     1, 1,-1,     1, 1,-1,
-                        1, 1, 1,     1, 1, 1,     1, 1, 1},
-            norm[] = {-1, 0, 0,     0,-1, 0,     0, 0,-1,
-                      -1, 0, 0,     0,-1, 0,     0, 0, 1,
-                      -1, 0, 0,     0, 1, 0,     0, 0,-1,
-                      -1, 0, 0,     0, 1, 0,     0, 0, 1,
-                       1, 0, 0,     0,-1, 0,     0, 0,-1,
-                       1, 0, 0,     0,-1, 0,     0, 0, 1,
-                       1, 0, 0,     0, 1, 0,     0, 0,-1,
-                       1, 0, 0,     0, 1, 0,     0, 0, 1},
-            idx[] = { 0, 3, 6,     3, 9, 6,  // left
-                     12,18,15,    15,18,21,  // right
-                      1,13, 4,     4,13,16,  // bottom
-                     10,22,19,     7,10,19,  // top
-                      2, 8,14,     8,20,14,  // back
-                      5,17,11,    17,23,11}; // front
-        e.vertices.assign(verts, verts + 72);
-        e.normals.assign(norm, norm + 72);
-        e.indices.assign(idx, idx + 36);
+        for(int i=0; i<8; ++i)
+            for(int j=0; j<3; ++j)
+            {
+                e.vertices.push_back(verts[i*3  ]);
+                e.vertices.push_back(verts[i*3+1]);
+                e.vertices.push_back(verts[i*3+2]);
+                for(int k=0; k<3; ++k)
+                    e.normals.push_back(j==k ? verts[i*3+k] : 0);
+            }
+        for(int i=0; i<3; ++i)
+            for(int j=0; j<12; ++j)
+                e.indices.push_back(idx[i*12+j]*3+i);
     }
     else
     {
-        int verts[] = {-1,-1,-1,    -1,-1, 1,    -1, 1,-1,    -1, 1, 1,
-                        1,-1,-1,     1,-1, 1,     1, 1,-1,     1, 1, 1},
-            idx[] = {0, 1, 2,     1, 3, 2,  // left
-                     4, 6, 5,     5, 6, 7,  // right
-                     0, 4, 1,     1, 4, 5,  // bottom
-                     3, 7, 6,     2, 3, 6,  // top
-                     0, 2, 4,     2, 6, 4,  // back
-                     1, 5, 3,     5, 7, 3}; // front
         e.vertices.assign(verts, verts + 24);
         e.indices.assign(idx, idx + 36);
     }
     return e;
 }
-Entity cuboid(float x, float y, float z)
+Entity cuboid(float x, float y, float z, bool calcNorm)
 {
     x /= 2; y /= 2; z /= 2;
-    Entity e = cube();
-    float verts[] = {-x,-y,-z,    -x,-y, z,    -x, y,-z,    -x, y, z,
-                      x,-y,-z,     x,-y, z,     x, y,-z,     x, y, z};
-    e.vertices.assign(verts, verts + 24);
+    Entity e = cube(calcNorm);
+    for(int i=0; i<72; i+=3)
+    {
+        e.vertices[i  ] *= x;
+        e.vertices[i+1] *= y;
+        e.vertices[i+2] *= z;
+    }
     return e;
 }
 Entity octahedron()
@@ -135,10 +125,10 @@ Entity icosahedron()
     e.indices.assign(idx, idx + 60);
     return e;
 }
-Entity sphere(int lat, int lng)
+Entity sphere(int lat, int lng, bool calcNorm)
 {
     Entity e;
-    float xy, z,
+    float xy, x, y, z,
           latStep = 2 * AGL_PI / lat,
           lngInv = 1. / lng,
           latAngle, lngAngle;
@@ -150,9 +140,17 @@ Entity sphere(int lat, int lng)
         for(int j=0; j<=lat; ++j)
         {
             latAngle = j * latStep;
-            e.vertices.push_back(xy * std::cos(latAngle));
-            e.vertices.push_back(xy * std::sin(latAngle));
+            x = xy * std::cos(latAngle);
+            y = xy * std::sin(latAngle);
+            e.vertices.push_back(x);
+            e.vertices.push_back(y);
             e.vertices.push_back(z);
+            if(calcNorm)
+            {
+                e.normals.push_back(x);
+                e.normals.push_back(y);
+                e.normals.push_back(z);
+            }
         }
     }
     int k1, k2;
@@ -178,12 +176,54 @@ Entity sphere(int lat, int lng)
     }
     return e;
 }
-Entity icosphere(int subdivision)
+Entity icosphere(int subdivision, bool calcNorm)
 {
     Entity e = icosahedron();
     for(int i=0; i<subdivision; ++i)
         subdivideVertices(e);
     normalizeVertices(e);
+    if(calcNorm)
+        e.normals.assign(e.vertices.begin(), e.vertices.end());
+    return e;
+}
+Entity cylinder(float r, float h, int strips)  // TODO: Add normals
+{
+    Entity e;
+    float step = 2 * AGL_PI / strips, ang = 0, x, y;
+    h /= 2;
+    std::vector<GLuint> upper, lower;
+    for(int i=0; i<strips; ++i, ang += step)
+    {
+        x = std::cos(ang);
+        y = std::sin(ang);
+        e.vertices.push_back(x*r);
+        e.vertices.push_back(-h);
+        e.vertices.push_back(y*r);
+        e.vertices.push_back(x*r);
+        e.vertices.push_back(h);
+        e.vertices.push_back(y*r);
+        if(i > 0)
+        {
+            e.indices.push_back(2*(i-1)  );
+            e.indices.push_back(2* i   +1);
+            e.indices.push_back(2*(i-1)+1);
+            e.indices.push_back(2*(i-1)  );
+            e.indices.push_back(2* i     );
+            e.indices.push_back(2* i   +1);
+        }
+        lower.push_back(2*i  );
+        upper.push_back(2*i+1);
+    }
+    e.indices.push_back(2*(strips-1)  );
+    e.indices.push_back(             1);
+    e.indices.push_back(2*(strips-1)+1);
+    e.indices.push_back(2*(strips-1)  );
+    e.indices.push_back(             0);
+    e.indices.push_back(             1);
+    lower = triangulatePolygon(lower);
+    e.indices.insert(e.indices.end(), lower.begin(), lower.end());
+    upper = triangulatePolygon(upper);
+    e.indices.insert(e.indices.end(), upper.begin(), upper.end());
     return e;
 }
 Entity plane(float x, float z, bool calcNorm)
@@ -281,6 +321,29 @@ void subdivideVertices(Entity &e)
         newIndices.push_back(edges[c*nv+a]);
     }
     e.indices.swap(newIndices);
+}
+void calcNormals(Entity &e, bool perFace)
+{
+    int l = e.vertices.size();
+    float ax = 0, ay = 0, az = 0, x, y, z, invSum;
+    e.normals.clear();
+    for(int i=0; i<l; i+=3)
+    {
+        ax += e.vertices[i  ];
+        ay += e.vertices[i+1];
+        az += e.vertices[i+2];
+    }
+    ax /= l; ay /= l; az /= l;
+    for(int i=0; i<l; i+=3)
+    {
+        x = e.vertices[i  ] - ax;
+        y = e.vertices[i+1] - ay;
+        z = e.vertices[i+2] - az;
+        invSum = 1 / std::sqrt(x * x + y * y + z * z);
+        e.normals.push_back(x * invSum);
+        e.normals.push_back(y * invSum);
+        e.normals.push_back(z * invSum);
+    }
 }
 std::vector<GLuint> triangulatePolygon(const std::vector<GLuint> &polygon)
 {

@@ -27,16 +27,20 @@ std::pair<std::string, std::string> Material::createShader(Entity *e, std::vecto
           "out vec3 pos;\n";
     if(lightsEnabled)
     {
-        vs << "uniform mat3 M, N;\n"
-              "out vec3 fpos, norm;\n";
+        vs << "uniform mat4 M;\n"
+              "out vec3 fpos;\n";
+        if(norm)
+            vs << "uniform mat3 N;\n"
+                  "out vec3 norm;\n";
     }
     vs << "void main() {\n"
           "    pos = vertexPos;\n"
           "    gl_Position = MVP * vec4(vertexPos, 1);\n";
-    if(lightsEnabled && norm)
+    if(lightsEnabled)
     {
-        vs << "    fpos = M * vertexPos;\n"
-              "    norm = N * normal;\n";
+        vs << "    fpos = vec3(M * vec4(vertexPos,1));\n";
+        if(norm)
+            vs << "    norm = N * normal;\n";
     }
     vs << "}";
 // ----------fragement shader----------
@@ -44,25 +48,41 @@ std::pair<std::string, std::string> Material::createShader(Entity *e, std::vecto
           "in vec3 pos;\n";
     if(lightsEnabled)
     {
- fs << "in vec3 fpos, norm;\n"
+       fs << (norm ? "in vec3 fpos, norm;\n" :  "in vec3 fpos;\n") <<
        "uniform vec4 emission, ambient, diffuse, specular;\n"
        "uniform float shininess;\n"
        "uniform vec3 vpos;\n\n"
        "uniform struct Light {\n"
-       "    vec4 ambient, diffuse, specular;\n"
-       "    vec3 position, halfVector, spotDirection;\n"
+       "    vec4 ambient, diffuse, specular, position;\n"
+       "    vec3 halfVector, spotDirection;\n"
        "    float spotExponent, spotCutoff, spotCosCutoff, constantAttenuation, linearAttenuation, quadraticAttenuation;\n"
        "} lights[" << lights.size() << "];\n\n";
     }
     else if(ambient.w >= 0)
         fs << "uniform vec4 ambient;\n";
-    fs << "out vec4 color;\n";
-    fs << "void main() {\n";
+    fs << "out vec4 color;\n"
+          "void main() {\n";
     if(lightsEnabled)
     {
- fs << "    vec3 norm = normalize(norm);\n"
-       "    vec3 lightDir = normalize(lights[0].position - fpos);\n"
-       "    color = (lights[0].ambient * ambient + max(dot(norm, lightDir), 0.0) * lights[0].diffuse * diffuse + pow(max(dot(normalize(vpos - fpos), reflect(-lightDir, norm)), 0.0), shininess) * lights[0].specular * specular);\n";
+ fs << "    vec3 norm = normalize(" << (norm ? "norm" : "cross(dFdx(fpos), dFdy(fpos))") << "), viewDir = normalize(vpos - fpos), lightDir;\n"
+       "    vec4 result = vec4(0);\n";
+ fs << "    for(int i=0; i<" << lights.size() << "; ++i)\n    {\n"
+       "        lightDir = normalize(lights[i].position.w==0 ? -lights[i].position.xyz : (lights[i].position.xyz - fpos));\n"
+       "        float spotlight = 1, d, attenuation;\n"
+       "        if(lights[i].spotCosCutoff >= 0)\n        {\n"
+       "            float spotCosine = dot(lightDir, -normalize(lights[i].spotDirection));\n"
+       "            spotlight = spotCosine >= lights[i].spotCosCutoff ? pow(spotCosine, lights[i].spotExponent) : 0;\n"
+       "        }\n"
+       "        if(lights[i].position.w == 1)\n        {\n"
+       "            d = distance(lights[i].position.xyz, fpos);\n"
+       "            spotlight /= lights[i].constantAttenuation + d * (lights[i].linearAttenuation +  d * lights[i].quadraticAttenuation);\n"
+       "        }\n"
+       "        result += emission + spotlight *\n"
+       "                 (lights[i].ambient * ambient +\n"
+       "                  max(dot(norm, lightDir), 0) * lights[i].diffuse * diffuse +\n"
+       "                  pow(max(dot(viewDir, reflect(-lightDir, norm)), 0), shininess) * lights[i].specular * specular);\n"
+       "    }\n"
+       "    color = result;\n";
     }
     else if(ambient.w >= 0)  // ----------no lights----------
         fs << "    color = ambient;\n";
@@ -111,7 +131,7 @@ std::pair<std::string, std::string> Material::createShader(Entity *e, std::vecto
         }
     }
     else
-        fs << "    color = vec4(0.9, 0.9, 0.9, 1);\n";
+        fs << "    color = vec4(0.9, 0.95, 1, 1);\n";
     fs << "}";
 //    std::cout << vs.str() << std::endl << fs.str() <<std::endl;
     return std::pair<std::string, std::string>(vs.str(), fs.str());

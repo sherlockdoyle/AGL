@@ -7,6 +7,8 @@ namespace agl {
 BaseEntity::~BaseEntity() = default;
 
 Entity::Entity(const glm::vec3 &pos): position(pos){}
+Entity::Entity(const Entity &other): vertices(other.vertices), normals(other.normals), indices(other.indices),
+    position(other.position), model(other.model), material(other.material) {}
 Entity::~Entity()
 {
     glDeleteVertexArrays(1, &VAO);
@@ -87,17 +89,17 @@ void Entity::createBuffers()
     glBufferData(GL_ARRAY_BUFFER, merged.size() * sizeof(GLfloat), &merged[0], dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
 
     bool norm = !normals.empty(), uv = false;
-    int stride = norm ? uv ? 8 : 6 : uv ? 5 : 3;
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), (void*)0);
+    int stride = (norm ? uv ? 8 : 6 : uv ? 5 : 3) * sizeof(GLfloat);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
     glEnableVertexAttribArray(0);
     if(norm)
     {
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(GLfloat)));
         glEnableVertexAttribArray(1);
     }
     if(uv)
     {
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride * sizeof(GLfloat), (void*)((norm ? 6 : 3) * sizeof(GLfloat)));
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)((norm ? 6 : 3) * sizeof(GLfloat)));
         glEnableVertexAttribArray(2);
     }
 
@@ -109,9 +111,9 @@ void Entity::createBuffers()
 glm::mat4 Entity::getMatM()
 {
     if(parent == nullptr)
-        return glm::translate(glm::mat4(1), position) * model;
+        return glm::translate(glm::mat4(), position) * model;
     else
-        return glm::translate(glm::mat4(1), position) * (parent->getMatM() * model);
+        return glm::translate(glm::mat4(), position) * (parent->getMatM() * model);
 }
 
 Material::Material() = default;
@@ -122,6 +124,44 @@ Material::~Material()
     glDeleteProgram(progID);
     delete texture;
 }
+Material Material::operator+(const Material &other) const
+{
+    Material res;
+    res.emission  = (emission + other.emission) / 2.f;
+    res.ambient   = (ambient  + other.ambient ) / 2.f;
+    res.diffuse   = (diffuse  + other.diffuse ) / 2.f;
+    res.specular  = (specular + other.specular) / 2.f;
+    res.shininess = std::sqrt(shininess * other.shininess);
+    return res;
+}
+Material &Material::operator+=(const Material &other)
+{
+    emission  = (emission + other.emission) / 2.f;
+    ambient   = (ambient  + other.ambient ) / 2.f;
+    diffuse   = (diffuse  + other.diffuse ) / 2.f;
+    specular  = (specular + other.specular) / 2.f;
+    shininess = std::sqrt(shininess * other.shininess);
+    return *this;
+}
+Material Material::operator*(const Material &other) const
+{
+    Material res;
+    res.emission  = emission * other.emission;
+    res.ambient   = ambient  * other.ambient ;
+    res.diffuse   = diffuse  * other.diffuse ;
+    res.specular  = specular * other.specular;
+    res.shininess = std::sqrt(shininess * other.shininess);
+    return res;
+}
+Material &Material::operator*=(const Material &other)
+{
+    emission  = emission * other.emission;
+    ambient   = ambient  * other.ambient ;
+    diffuse   = diffuse  * other.diffuse ;
+    specular  = specular * other.specular;
+    shininess = std::sqrt(shininess * other.shininess);
+    return *this;
+}
 void Material::setColor(glm::vec4 color)
 {
     emission = ambient = diffuse = specular = color;
@@ -130,10 +170,17 @@ void Material::setColor(float r, float g, float b, float a)
 {
     emission = ambient = diffuse = specular = glm::vec4(r, g, b, a);
 }
-void Material::setShader(std::string vertexShader, std::string fragmentShader)
+void Material::setColor(const Material &other)
+{
+    emission = other.emission;
+    ambient  = other.ambient;
+    diffuse  = other.diffuse;
+    specular = other.specular;
+}
+void Material::setShader(std::string vertexShader, std::string fragmentShader, bool forceSet)
 {
     progID = loadShaders(vertexShader.c_str(), fragmentShader.c_str());
-    if(!customShader)
+    if(!customShader || forceSet)
     {
         mvpID = glGetUniformLocation(progID, "MVP");
         aID   = glGetUniformLocation(progID, "ambient");
@@ -150,9 +197,9 @@ void Material::setShader(std::string vertexShader, std::string fragmentShader)
     }
 }
 
-Light::Light(const glm::vec3 &pos, glm::vec4 color): ambient(color), diffuse(color), specular(color), position(pos) {}
+Light::Light(const glm::vec3 &pos, const glm::vec4 &color): ambient(color), diffuse(color), specular(color), position(pos, 1) {}
 Light::Light(const glm::vec3 &pos, float r, float g, float b, float a): ambient(r, g, b, a), diffuse(r, g, b, a),
-    specular(r, g, b, a), position(pos) {}
+    specular(r, g, b, a), position(pos, 1) {}
 void Light::setColor(glm::vec4 color)
 {
     ambient = diffuse = specular = color;
@@ -160,6 +207,19 @@ void Light::setColor(glm::vec4 color)
 void Light::setColor(float r, float g, float b, float a)
 {
     ambient = diffuse = specular = glm::vec4(r, g, b, a);
+}
+
+SharedEntity::SharedEntity(Entity &src): Entity(src)
+{
+    source = &src;
+}
+void SharedEntity::mergeData() {}
+void SharedEntity::createBuffers()
+{
+    VAO = source->VAO;
+    VBO = source->VBO;
+    EBO = source->EBO;
+    std::cout << "called" << std::endl;
 }
 
 const Material Material::emerald = Material(0.0215, 0.1745, 0.0215, 0.07568, 0.61424, 0.07568, 0.633, 0.727811, 0.633, 76.8);

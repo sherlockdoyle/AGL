@@ -1,5 +1,8 @@
 #include<sstream>
 #include "../AGL/agl.h"
+#include "../AGL/glm/gtx/string_cast.hpp"
+#include<thread>
+#include<chrono>
 
 double lastTime;
 int nbFrames = 0;
@@ -22,39 +25,69 @@ void showFPS(GLFWwindow *window)
 int main()
 {
     agl::Scene scene(640, 480);
-    agl::Entity cube = agl::cube(true),
-            cube2 = agl::sphere(),
-            plane = agl::plane(10, 10);
-    plane.material = agl::Material::ruby;
+    scene.camera.setPos(-7,1,7);
+    agl::Entity cube1 = agl::cube(true), cube2 = agl::cube(true), cube3 = agl::cube(true),
+            plane = agl::plane(100, 100, true),
+            light1_holder = agl::cube(), light2_holder = agl::cube(), light3_holder = agl::cube();
+    plane.material = agl::Material::white_plastic + agl::Material::white_rubber;
     plane.position.y = -1.5;
+    light1_holder.scale(0.4);
+    light2_holder.scale(0.4);
+    light3_holder.scale(0.4);
 
-    agl::Light sunlight(glm::vec3(2, 2, 2), 1, 1, 1);
-    sunlight.ambient *= 0.5;
-//    sunlight.specular *= 0.5;
+    agl::Light light1(glm::vec3(0), 0, 0, 1),
+               light2(glm::vec3(0), 0, 1, 0),
+               light3(glm::vec3(0), 1, 1, 1);
+    light1.ambient *= 0.5;
+    light2.ambient *= 0.5;
+    light3.ambient *= 0.5;
+    light2.specular *= .1;
+    light1_holder.add(light1);
+    light2_holder.add(light2);
+    light3_holder.add(light3);
+    light1_holder.material.ambient = light1.diffuse;
+    light2_holder.material.ambient = light2.diffuse;
+    light3_holder.material.ambient = light3.diffuse;
 
-    cube.material = agl::Material::green_rubber;
-    cube2.material.ambient = glm::vec4(1);
-    cube2.scale(0.1);
-    cube2.position = sunlight.position;
+    cube1.material = agl::Material::brass;
+    cube2.material = agl::Material::bronze;
+    cube3.material = agl::Material::pearl;
+
+    cube1.translate(0,0,2);
+    cube2.scale(.75);
+    cube2.translate(-1, 2, 0);
+    cube3.rotate(glm::radians(-30.f), glm::vec3(2,3,5));
+    cube3.translate(-2, -1, -2);
+    light1_holder.position = glm::vec3(1, .75, 4);
+    light2_holder.position = glm::vec3(1, 3, -1);
+    light3_holder.position = glm::vec3(-3, -1, 2);
 
     scene.add(plane);
+    scene.add(light1_holder);
+    scene.add(light2_holder);
+    scene.add(light3_holder);
+    scene.add(cube1);
     scene.add(cube2);
-    scene.add(sunlight);
-    scene.add(cube);
+    scene.add(cube3);
+
     scene.enableLights();
-//    plane.material.lightsEna/bled = false;
-    cube2.material.lightsEnabled = false;
+    light1_holder.material.lightsEnabled = false;
+    light2_holder.material.lightsEnabled = false;
+    light3_holder.material.lightsEnabled = false;
+//    std::cout << glm::to_string(light1.getPos()) << std::endl;
     scene.prepare();
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 //    glLineWidth(3);
+//    int i = 0;
     while(glfwWindowShouldClose(scene.window) == 0)
     {
-        cube.rotate(0.01, glm::vec3(0, 1, 0));
-        scene.camera.rotateY(-0.005);
+//        cube1.rotate(0.01, glm::vec3(0, 1, 0));
+        scene.camera.rotateY(-0.01);
         scene.render();
 //        std::stringstream path;
 //        path << "../img/img" << i++ << ".ppm";
 //        agl::saveImage(path.str().c_str(), 640, 480);
+//        std::this_thread::sleep_for(std::chrono::microseconds(50));
     }
 
     return 0;

@@ -80,6 +80,7 @@ void enableLight(std::vector<BaseEntity*> &children, bool enable)
             enableLight(ent->children, enable);
         }
 }
+float lt;
 }
 void Scene::enableLights(bool enable)
 {
@@ -95,10 +96,13 @@ void Scene::prepare()
     getAllEntity(children);
     for(Entity *e: entities)
     {
-        std::pair<std::string, std::string> shaders = e->material.createShader(e, lights);
-        e->material.setShader(shaders.first, shaders.second);
         e->mergeData();
         e->createBuffers();
+        if(!e->material.customShader)
+        {
+            std::pair<std::string, std::string> shaders = e->material.createShader(e, lights);
+            e->material.setShader(shaders.first, shaders.second);
+        }
     }
 }
 void Scene::render()
@@ -116,7 +120,7 @@ void Scene::render()
         glUniform4fv(e->material.aID, 1, &e->material.ambient[0]);
         if(e->material.lightsEnabled)
         {
-            glUniformMatrix3fv(e->material.mID, 1, GL_FALSE, &glm::mat3(model)[0][0]);
+            glUniformMatrix4fv(e->material.mID, 1, GL_FALSE, &model[0][0]);
             glUniformMatrix3fv(e->material.nID, 1, GL_FALSE, &glm::mat3(glm::transpose(glm::inverse(model)))[0][0]);
             glUniform4fv(e->material.eID, 1, &e->material.emission[0]);
             glUniform4fv(e->material.dID, 1, &e->material.diffuse[0]);
@@ -132,15 +136,15 @@ void Scene::render()
                 std::stringstream().swap(lt); lt << "lights[" << i << "].specular";
                 glUniform4fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->specular[0]);
                 std::stringstream().swap(lt); lt << "lights[" << i << "].position";
-                glUniform3fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->position[0]);
-                std::stringstream().swap(lt); lt << "lights[" << i << "].halfVector";
-                glUniform3fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->halfVector[0]);
+                glUniform4fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->getPos()[0]);
+//                std::stringstream().swap(lt); lt << "lights[" << i << "].halfVector";
+//                glUniform3fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->halfVector[0]);
                 std::stringstream().swap(lt); lt << "lights[" << i << "].spotDirection";
                 glUniform3fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->spotDirection[0]);
                 std::stringstream().swap(lt); lt << "lights[" << i << "].spotExponent";
                 glUniform1f(glGetUniformLocation(e->material.progID, lt.str().c_str()), lights[i]->spotExponent);
-                std::stringstream().swap(lt); lt << "lights[" << i << "].spotCutoff";
-                glUniform1f(glGetUniformLocation(e->material.progID, lt.str().c_str()), lights[i]->spotCutoff);
+//                std::stringstream().swap(lt); lt << "lights[" << i << "].spotCutoff";
+//                glUniform1f(glGetUniformLocation(e->material.progID, lt.str().c_str()), lights[i]->spotCutoff);
                 std::stringstream().swap(lt); lt << "lights[" << i << "].spotCosCutoff";
                 glUniform1f(glGetUniformLocation(e->material.progID, lt.str().c_str()), lights[i]->spotCosCutoff);
                 std::stringstream().swap(lt); lt << "lights[" << i << "].constantAttenuation";
@@ -336,6 +340,7 @@ void Camera::viewTransform(const glm::mat4 &m)
 
 void defKeyCB(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+    float ct = glfwGetTime(), dt = std::min((ct - lt) * 7, 0.1f); lt = ct;
     // W: Camera forward
     // A: Camera left
     // S: Camera backward
@@ -353,62 +358,63 @@ void defKeyCB(GLFWwindow *window, int key, int scancode, int action, int mods)
     if(key == GLFW_KEY_W)
     {
         d.y = 0;
-        d = glm::normalize(d) * 0.1f;
+        d = glm::normalize(d) * dt;
         camera.view = glm::lookAt(camera._pos -= d, camera._lookAt -= d, camera._up);
     }
     if(key == GLFW_KEY_S)
     {
         d.y = 0;
-        d = glm::normalize(d) * 0.1f;
+        d = glm::normalize(d) * dt;
         camera.view = glm::lookAt(camera._pos += d, camera._lookAt += d, camera._up);
     }
     if(key == GLFW_KEY_A)
     {
         d.y = d.x; d.x = d.z; d.z = -d.y; d.y = 0;
-        d = glm::normalize(d) * 0.1f;
+        d = glm::normalize(d) * dt;
         camera.view = glm::lookAt(camera._pos -= d, camera._lookAt -= d, camera._up);
     }
     if(key == GLFW_KEY_D)
     {
         d.y = d.x; d.x = d.z; d.z = -d.y; d.y = 0;
-        d = glm::normalize(d) * 0.1f;
+        d = glm::normalize(d) * dt;
         camera.view = glm::lookAt(camera._pos += d, camera._lookAt += d, camera._up);
     }
     if(key == GLFW_KEY_UP)
     {
         d.y = d.x; d.x = d.z; d.z = -d.y; d.y = 0;
-        camera.rotate(0.03, glm::normalize(d), false);
+        camera.rotate(dt*.2, glm::normalize(d), false);
     }
     if(key == GLFW_KEY_DOWN)
     {
         d.y = d.x; d.x = d.z; d.z = -d.y; d.y = 0;
-        camera.rotate(-0.03, glm::normalize(d), false);
+        camera.rotate(-dt*.2, glm::normalize(d), false);
     }
     if(key == GLFW_KEY_LEFT)
-        camera.rotateY(0.03, false);
+        camera.rotateY(dt*.2, false);
     if(key == GLFW_KEY_RIGHT)
-        camera.rotateY(-0.03, false);
+        camera.rotateY(-dt*.2, false);
     if(key == GLFW_KEY_Q)
     {
-        camera._pos.y -= 0.1;
-        camera._lookAt.y -= 0.1;
+        camera._pos.y -= dt;
+        camera._lookAt.y -= dt;
         camera.view = glm::lookAt(camera._pos, camera._lookAt, camera._up);
     }
     if(key == GLFW_KEY_E)
     {
-        camera._pos.y += 0.1;
-        camera._lookAt.y += 0.1;
+        camera._pos.y += dt;
+        camera._lookAt.y += dt;
         camera.view = glm::lookAt(camera._pos, camera._lookAt, camera._up);
     }
 }
 void defScrollCB(GLFWwindow *window, double xoffset, double yoffset)
 {
+    float ct = glfwGetTime(), dt = std::min((ct - lt) * 2., 0.035); lt = ct;
     // Scroll: rotate camera
     Camera &camera = static_cast<Scene*>(glfwGetWindowUserPointer(window))->camera;
-    camera.rotateY(-0.03 * xoffset, false);
+    camera.rotateY(-dt * xoffset, false);
     glm::vec3 d = camera._pos - camera._lookAt;
     d.y = d.x; d.x = d.z; d.z = -d.y; d.y = 0;
-    camera.rotate(-0.03 * yoffset, glm::normalize(d), false);
+    camera.rotate(-dt * yoffset, glm::normalize(d), false);
 }
 void defWindowSizeCB(GLFWwindow *window, int w, int h)
 {
