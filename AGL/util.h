@@ -73,7 +73,7 @@ void saveImage(const char* path, int w, int h);
 
 /*!
  * \name Special colors
- * These are constants for special colors for #Material.
+ * These are constants for special colors for [materials](\ref agl::Material).
  * @{
  */
 #define AGL_COLOR_POS2RGB -1  //!< Position based color.
