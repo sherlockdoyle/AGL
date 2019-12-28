@@ -1,0 +1,5 @@
+<map id="Light" name="Light">
+<area shape="rect" id="node2" href="$classagl_1_1BaseEntity.html" title="The base for all Entity and Light. " alt="" coords="21,73,107,99"/>
+<area shape="rect" id="node3" href="$classagl_1_1Entity.html" title="The Entity; basically all visible objects in AGL. " alt="" coords="80,229,136,256"/>
+<area shape="rect" id="node4" href="$classagl_1_1Material.html" title="Material class for entities. " alt="" coords="146,73,214,99"/>
+</map>

@@ -2,13 +2,15 @@
 #include "scene.h"
 #include "util.h"
 #include "glm/gtc/matrix_transform.hpp"
+#define STB_IMAGE_IMPLEMENTATION
+#include "../AGL/stb_image.h"
 
 namespace agl {
 BaseEntity::~BaseEntity() = default;
 
 Entity::Entity(const glm::vec3 &pos): position(pos){}
-Entity::Entity(const Entity &other): vertices(other.vertices), normals(other.normals), indices(other.indices),
-    position(other.position), model(other.model), material(other.material) {}
+Entity::Entity(const Entity &other): vertices(other.vertices), normals(other.normals), uvs(other.uvs),
+    indices(other.indices), position(other.position), model(other.model), material(other.material) {}
 Entity::~Entity()
 {
     glDeleteVertexArrays(1, &VAO);
@@ -45,6 +47,7 @@ void Entity::transform(const glm::mat4 &m)
 }
 void Entity::applyTransform()
 {
+    glm::mat3 normal = glm::mat3(glm::transpose(glm::inverse(model)));
     glm::vec4 transformed;
     for(int i=0, l=vertices.size(); i<l; i+=3)
     {
@@ -52,6 +55,10 @@ void Entity::applyTransform()
         vertices[i  ] = transformed.x;
         vertices[i+1] = transformed.y;
         vertices[i+2] = transformed.z;
+        transformed = glm::vec4(normal * glm::vec3(normals[i], normals[i+1], normals[i+2]), 1);
+        normals[i  ] = transformed.x;
+        normals[i+1] = transformed.y;
+        normals[i+2] = transformed.z;
     }
     model = glm::mat4();
 }
@@ -62,9 +69,9 @@ void Entity::add(BaseEntity &e)
 }
 void Entity::mergeData()
 {
-    bool norm = !normals.empty();
+    bool norm = !normals.empty(), uv = !uvs.empty();
     merged.clear();
-    for(int i=0, l=vertices.size(); i<l; i+=3)
+    for(int i=0, j=0, l=vertices.size(); i<l; i+=3)
     {
         merged.push_back(vertices[i  ]);
         merged.push_back(vertices[i+1]);
@@ -74,6 +81,11 @@ void Entity::mergeData()
             merged.push_back(normals[i  ]);
             merged.push_back(normals[i+1]);
             merged.push_back(normals[i+2]);
+        }
+        if(uv)
+        {
+            merged.push_back(uvs[j++]);
+            merged.push_back(uvs[j++]);
         }
     }
 }
@@ -88,7 +100,7 @@ void Entity::createBuffers()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, merged.size() * sizeof(GLfloat), &merged[0], dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
 
-    bool norm = !normals.empty(), uv = false;
+    bool norm = !normals.empty(), uv = !uvs.empty();
     int stride = (norm ? uv ? 8 : 6 : uv ? 5 : 3) * sizeof(GLfloat);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
     glEnableVertexAttribArray(0);
@@ -99,8 +111,8 @@ void Entity::createBuffers()
     }
     if(uv)
     {
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)((norm ? 6 : 3) * sizeof(GLfloat)));
-        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(norm ? 2 : 1, 2, GL_FLOAT, GL_FALSE, stride, (void*)((norm ? 6 : 3) * sizeof(GLfloat)));
+        glEnableVertexAttribArray(norm ? 2 : 1);
     }
 
     glDeleteBuffers(1, &EBO);
@@ -116,13 +128,12 @@ glm::mat4 Entity::getMatM()
         return glm::translate(glm::mat4(), position) * (parent->getMatM() * model);
 }
 
-Material::Material() = default;
+Material::Material(): ratios(1, -1, -1, -1) {}
 Material::Material(float ar, float ag, float ab, float dr, float dg, float db, float sr, float sg, float sb, float sn):
     ambient(ar, ag, ab, 1), diffuse(dr, dg, db, 1), specular(sr, sg, sb, 1), shininess(sn) {}
 Material::~Material()
 {
     glDeleteProgram(progID);
-    delete texture;
 }
 Material Material::operator+(const Material &other) const
 {
@@ -177,23 +188,40 @@ void Material::setColor(const Material &other)
     diffuse  = other.diffuse;
     specular = other.specular;
 }
-void Material::setShader(std::string vertexShader, std::string fragmentShader, bool forceSet)
+void Material::createTexture(const char *path)
 {
-    progID = loadShaders(vertexShader.c_str(), fragmentShader.c_str());
-    if(!customShader || forceSet)
+    if(path != nullptr)
+        texture = stbi_load(path, &tex_width, &tex_height, &tex_channel, 0);
+    glDeleteTextures(1, &tID);
+    glGenTextures(1, &tID);
+    glBindTexture(GL_TEXTURE_2D, tID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, tex_channel==4 ? GL_RGBA : GL_RGB, tex_width, tex_height, 0, tex_channel==4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, texture);
+}
+//void Material::setTexture(const Material &other)
+//{
+//    tex_width   = other.tex_width;
+//    tex_height  = other.tex_height;
+//    tex_channel = other.tex_channel;
+//    texture     = other.texture;
+//}
+void Material::setShader(std::string vertexShader, std::string fragmentShader)
+{
+    progID = loadShaders(vertexShader, fragmentShader);
+    mvpID = glGetUniformLocation(progID, "MVP");
+    mID = glGetUniformLocation(progID, "M");
+    nID = glGetUniformLocation(progID, "N");
+    eID = glGetUniformLocation(progID, "emission");
+    if(lightsEnabled)  // only calculate if lights enabled
     {
-        mvpID = glGetUniformLocation(progID, "MVP");
-        aID   = glGetUniformLocation(progID, "ambient");
-        if(lightsEnabled)  // only calculate if lights enabled
-        {
-            mID = glGetUniformLocation(progID, "M");
-            nID = glGetUniformLocation(progID, "N");
-            eID = glGetUniformLocation(progID, "emission");
-            dID = glGetUniformLocation(progID, "diffuse");
-            sID = glGetUniformLocation(progID, "specular");
-            gID = glGetUniformLocation(progID, "shininess");
-            vID = glGetUniformLocation(progID, "vpos");
-        }
+        aID = glGetUniformLocation(progID, "ambient");
+        dID = glGetUniformLocation(progID, "diffuse");
+        sID = glGetUniformLocation(progID, "specular");
+        gID = glGetUniformLocation(progID, "shininess");
+        vID = glGetUniformLocation(progID, "vpos");
     }
 }
 
@@ -247,3 +275,5 @@ const Material Material::red_rubber = Material(0.05, 0, 0, 0.5, 0.4, 0.4, 0.7, 0
 const Material Material::white_rubber = Material(0.05, 0.05, 0.05, 0.5, 0.5, 0.5, 0.7, 0.7, 0.7, 10);
 const Material Material::yellow_rubber = Material(0.05, 0.05, 0, 0.5, 0.5, 0.4, 0.7, 0.7, 0.04, 10);
 }
+
+#undef STB_IMAGE_IMPLEMENTATION

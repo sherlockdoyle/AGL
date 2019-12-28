@@ -17,7 +17,7 @@ Entity tetrahedron()
     e.indices.assign(idx, idx + 12);
     return e;
 }
-Entity cube(bool calcNorm)
+Entity cube(bool calcNorm, bool calcUV)
 {
     Entity e;
     int verts[] = {-1,-1,-1,    -1,-1, 1,    -1, 1,-1,    -1, 1, 1,
@@ -28,7 +28,7 @@ Entity cube(bool calcNorm)
                  3, 7, 6,     2, 3, 6,  // top
                  0, 2, 4,     2, 6, 4,  // back
                  1, 5, 3,     5, 7, 3}; // front
-    if(calcNorm)
+    if(calcNorm || calcUV)
     {
         for(int i=0; i<8; ++i)
             for(int j=0; j<3; ++j)
@@ -36,12 +36,23 @@ Entity cube(bool calcNorm)
                 e.vertices.push_back(verts[i*3  ]);
                 e.vertices.push_back(verts[i*3+1]);
                 e.vertices.push_back(verts[i*3+2]);
-                for(int k=0; k<3; ++k)
-                    e.normals.push_back(j==k ? verts[i*3+k] : 0);
+                if(calcNorm)
+                    for(int k=0; k<3; ++k)
+                        e.normals.push_back(j==k ? verts[i*3+k] : 0);
             }
         for(int i=0; i<3; ++i)
             for(int j=0; j<12; ++j)
                 e.indices.push_back(idx[i*12+j]*3+i);
+        if(calcUV)
+        {
+            int uv[] = {0, 0,     1, 1,     1, 0,     1, 0,
+                        1, 0,     0, 0,     0, 1,     0, 1,
+                        1, 1,     1, 1,     0, 0,     0, 1,
+                        1, 0,     0, 1,     0, 0,     0, 0,
+                        0, 0,     1, 0,     1, 1,     1, 1,
+                        0, 1,     0, 1,     1, 0,     1, 1};
+            e.uvs.assign(uv, uv + 48);
+        }
     }
     else
     {
@@ -50,10 +61,10 @@ Entity cube(bool calcNorm)
     }
     return e;
 }
-Entity cuboid(float x, float y, float z, bool calcNorm)
+Entity cuboid(float x, float y, float z, bool calcNorm, bool calcUV)
 {
     x /= 2; y /= 2; z /= 2;
-    Entity e = cube(calcNorm);
+    Entity e = cube(calcNorm, calcUV);
     for(int i=0; i<72; i+=3)
     {
         e.vertices[i  ] *= x;
@@ -74,7 +85,7 @@ Entity octahedron()
     e.indices.assign(idx, idx + 24);
     return e;
 }
-Entity dodecahedron()
+Entity dodecahedron()  // TODO: Correctly orrient vertices
 {
 #define P 1.618033988749894848204586834365638117720309179805762862135
 #define Q 0.618033988749894848204586834365638117720309179805762862135
@@ -117,15 +128,15 @@ Entity icosahedron()
     float verts[] = { 0, P, 1,     0, P,-1,     0,-P, 1,     0,-P,-1,
                       1, 0, P,    -1, 0, P,     1, 0,-P,    -1, 0,-P,
                       P, 1, 0,     P,-1, 0,    -P, 1, 0,    -P,-1, 0};
-    int idx[] = {0, 1, 8,     0, 4, 5,     0, 5,10,     0, 8, 4,     0,10, 1,
-                 1, 6, 8,     1, 7, 6,     1,10, 7,     2, 3,11,     2, 4, 9,
-                 2, 5, 4,     2, 9, 3,     2,11, 5,     3, 6, 7,     3, 7,11,
-                 3, 9, 6,     4, 8, 9,     5,11,10,     6, 9, 8,     7,10,11};
+    int idx[] = {0, 1,10,    0, 4, 8,    0, 5, 4,    0, 8, 1,    0,10, 5,
+                 1, 6, 7,    1, 8, 6,    1, 7,10,    2, 3, 9,    2, 4, 5,
+                 2, 5,11,    2, 9, 4,    2,11, 3,    3, 6, 9,    3, 7, 6,
+                 3,11, 7,    4, 9, 8,    5,10,11,    6, 8, 9,    7,11,10};
     e.vertices.assign(verts, verts + 36);
     e.indices.assign(idx, idx + 60);
     return e;
 }
-Entity sphere(int lat, int lng, bool calcNorm)
+Entity sphere(int lat, int lng, bool calcNorm, bool calcUV)
 {
     Entity e;
     float xy, x, y, z,
@@ -150,6 +161,11 @@ Entity sphere(int lat, int lng, bool calcNorm)
                 e.normals.push_back(x);
                 e.normals.push_back(y);
                 e.normals.push_back(z);
+            }
+            if(calcUV)
+            {
+                e.uvs.push_back(float(j) / lat);
+                e.uvs.push_back(float(i) / lng);
             }
         }
     }
@@ -180,7 +196,7 @@ Entity icosphere(int subdivision, bool calcNorm)
 {
     Entity e = icosahedron();
     for(int i=0; i<subdivision; ++i)
-        subdivideVertices(e);
+        subdivideFaces(e);
     normalizeVertices(e);
     if(calcNorm)
         e.normals.assign(e.vertices.begin(), e.vertices.end());
@@ -226,7 +242,7 @@ Entity cylinder(float r, float h, int strips)  // TODO: Add normals
     e.indices.insert(e.indices.end(), upper.begin(), upper.end());
     return e;
 }
-Entity plane(float x, float z, bool calcNorm)
+Entity plane(float x, float z, bool calcNorm, bool calcUV)
 {
     x /= 2; z /= 2;
     Entity e;
@@ -238,6 +254,11 @@ Entity plane(float x, float z, bool calcNorm)
     {
         int norm[] = {0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0};
         e.normals.assign(norm, norm + 12);
+    }
+    if(calcUV)
+    {
+        int uv[] = {0, 1, 0, 0, 1, 1, 1, 0};
+        e.uvs.assign(uv, uv + 8);
     }
     return e;
 }
@@ -279,7 +300,7 @@ void normalizeVertices(Entity &e, float t)
         e.vertices[i*3+2] = z * invSum + (1 - t) * e.vertices[i*3+2];
     }
 }
-void subdivideVertices(Entity &e)
+void subdivideFaces(Entity &e)
 {
     int nv = e.vertices.size() / 3, a, b, c;
     std::vector<int> edges(nv*nv, 0);  // TODO: Improve hashing
@@ -345,6 +366,24 @@ void calcNormals(Entity &e, bool perFace)
         e.normals.push_back(z * invSum);
     }
 }
+void calcTextureCoords(Entity &e, glm::vec3 px, glm::vec3 py, bool normalize)
+{
+    float x, y, inv;
+    e.uvs.clear();
+    for(int i=0, l=e.vertices.size(); i<l; i+=3)
+    {
+        x = e.vertices[i] * px.x + e.vertices[i+1] * px.y + e.vertices[i+2] * px.z;
+        y = e.vertices[i] * py.x + e.vertices[i+1] * py.y + e.vertices[i+2] * py.z;
+        if(normalize)
+        {
+            inv = 1 / std::sqrt(x * x + y * y);
+            x *= inv;
+            y *= inv;
+        }
+        e.uvs.push_back(x);
+        e.uvs.push_back(y);
+    }
+}
 std::vector<GLuint> triangulatePolygon(const std::vector<GLuint> &polygon)
 {
     std::queue<GLuint, std::deque<GLuint>> q(std::deque<GLuint>(polygon.begin(), polygon.end()));
@@ -361,3 +400,6 @@ std::vector<GLuint> triangulatePolygon(const std::vector<GLuint> &polygon)
     return indices;
 }
 }
+
+#undef P
+#undef Q

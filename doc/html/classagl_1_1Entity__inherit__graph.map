@@ -1,0 +1,4 @@
+<map id="Entity" name="Entity">
+<area shape="rect" id="node3" href="$classagl_1_1SharedEntity.html" title="A SharedEntity shares its data off another Entity. " alt="" coords="5,155,103,181"/>
+<area shape="rect" id="node2" href="$classagl_1_1BaseEntity.html" title="The base for all Entity and Light. " alt="" coords="11,5,97,32"/>
+</map>

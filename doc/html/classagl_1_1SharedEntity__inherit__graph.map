@@ -1,0 +1,4 @@
+<map id="SharedEntity" name="SharedEntity">
+<area shape="rect" id="node2" href="$classagl_1_1Entity.html" title="The Entity; basically all visible objects in AGL. " alt="" coords="26,80,82,107"/>
+<area shape="rect" id="node3" href="$classagl_1_1BaseEntity.html" title="The base for all Entity and Light. " alt="" coords="11,5,97,32"/>
+</map>

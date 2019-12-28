@@ -28,7 +28,7 @@ Scene::~Scene()
     if(window)
         glfwDestroyWindow(window);
 }
-void Scene::setProjection(glm::mat4 mat)
+void Scene::setProjection(glm::mat4 &mat)
 {
     projection = mat;
 }
@@ -38,11 +38,11 @@ void Scene::setPerspectiveProjection(float fovDeg, float aspectRatio, float near
         aspectRatio = float(width) / height;
     projection = glm::perspective(glm::radians(fovDeg), aspectRatio, near, far);
 }
-void Scene::setOrthographicProjection(float left, float right, float bottom, float top)
+void Scene::setOrthographicProjection(float left, float right, float bottom, float top, float near, float far)
 {
-    projection = glm::ortho(left, right, bottom, top);
+    projection = glm::ortho(left, right, bottom, top, near, far);
 }
-void Scene::setView(glm::mat4 mat)
+void Scene::setView(glm::mat4 &mat)
 {
     camera.setView(mat);
 }
@@ -117,12 +117,16 @@ void Scene::render()
         glm::mat4 model = e->getMatM(),
                 mvp = vp * model;
         glUniformMatrix4fv(e->material.mvpID, 1, GL_FALSE, &mvp[0][0]);
-        glUniform4fv(e->material.aID, 1, &e->material.ambient[0]);
+        glUniformMatrix4fv(e->material.mID, 1, GL_FALSE, &model[0][0]);
+        glUniformMatrix3fv(e->material.nID, 1, GL_FALSE, &glm::mat3(glm::transpose(glm::inverse(model)))[0][0]);
+        glUniform4fv(e->material.eID, 1, &e->material.emission[0]);
+        if(e->material.texture == nullptr)
+            glBindTexture(GL_TEXTURE_2D, 0);
+        else
+            glBindTexture(GL_TEXTURE_2D, e->material.tID);
         if(e->material.lightsEnabled)
         {
-            glUniformMatrix4fv(e->material.mID, 1, GL_FALSE, &model[0][0]);
-            glUniformMatrix3fv(e->material.nID, 1, GL_FALSE, &glm::mat3(glm::transpose(glm::inverse(model)))[0][0]);
-            glUniform4fv(e->material.eID, 1, &e->material.emission[0]);
+            glUniform4fv(e->material.aID, 1, &e->material.ambient[0]);
             glUniform4fv(e->material.dID, 1, &e->material.diffuse[0]);
             glUniform4fv(e->material.sID, 1, &e->material.specular[0]);
             glUniform1f(e->material.gID, e->material.shininess);
@@ -137,14 +141,10 @@ void Scene::render()
                 glUniform4fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->specular[0]);
                 std::stringstream().swap(lt); lt << "lights[" << i << "].position";
                 glUniform4fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->getPos()[0]);
-//                std::stringstream().swap(lt); lt << "lights[" << i << "].halfVector";
-//                glUniform3fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->halfVector[0]);
                 std::stringstream().swap(lt); lt << "lights[" << i << "].spotDirection";
                 glUniform3fv(glGetUniformLocation(e->material.progID, lt.str().c_str()), 1, &lights[i]->spotDirection[0]);
                 std::stringstream().swap(lt); lt << "lights[" << i << "].spotExponent";
                 glUniform1f(glGetUniformLocation(e->material.progID, lt.str().c_str()), lights[i]->spotExponent);
-//                std::stringstream().swap(lt); lt << "lights[" << i << "].spotCutoff";
-//                glUniform1f(glGetUniformLocation(e->material.progID, lt.str().c_str()), lights[i]->spotCutoff);
                 std::stringstream().swap(lt); lt << "lights[" << i << "].spotCosCutoff";
                 glUniform1f(glGetUniformLocation(e->material.progID, lt.str().c_str()), lights[i]->spotCosCutoff);
                 std::stringstream().swap(lt); lt << "lights[" << i << "].constantAttenuation";
@@ -341,14 +341,6 @@ void Camera::viewTransform(const glm::mat4 &m)
 void defKeyCB(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
     float ct = glfwGetTime(), dt = std::min((ct - lt) * 7, 0.1f); lt = ct;
-    // W: Camera forward
-    // A: Camera left
-    // S: Camera backward
-    // D: Camera right
-    // Q: Camera down
-    // E: Camera up
-    // 0: Reset camera
-    // Arrow keys: Rotate camera
     Camera &camera = static_cast<Scene*>(glfwGetWindowUserPointer(window))->camera;
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);

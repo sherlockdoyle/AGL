@@ -1,0 +1,27 @@
+var group__predefined__materials =
+[
+    [ "black_plastic", "group__predefined__materials.html#ga6311bc8ad43c6a60fe7c47a9d22639dc", null ],
+    [ "black_rubber", "group__predefined__materials.html#ga052d2d8902d8be1265ebb3bde9b655a9", null ],
+    [ "brass", "group__predefined__materials.html#ga1e3f19e4fd316c25fa7a310fa6f532b7", null ],
+    [ "bronze", "group__predefined__materials.html#ga2e3af8a9c1425e6caae98d082c8786b8", null ],
+    [ "chrome", "group__predefined__materials.html#gad035c19ede9a93847517682c98e344e3", null ],
+    [ "copper", "group__predefined__materials.html#ga59d06276451398a52a7aa96c6ca69915", null ],
+    [ "cyan_plastic", "group__predefined__materials.html#ga797fa4f1616f9174ff5844f69691afb8", null ],
+    [ "cyan_rubber", "group__predefined__materials.html#ga3419fccce41c5edd7534a095b60dbb4d", null ],
+    [ "emerald", "group__predefined__materials.html#ga629e727abb2187f554ca5f2b31ed7090", null ],
+    [ "gold", "group__predefined__materials.html#ga7be855e7458ab52bdf6df4b75284c88f", null ],
+    [ "green_plastic", "group__predefined__materials.html#ga31b3ad5b31ae73be8b5a5456c53be0d2", null ],
+    [ "green_rubber", "group__predefined__materials.html#ga06568e5aece0fb612cbd07042a30e877", null ],
+    [ "jade", "group__predefined__materials.html#gabd575fe5813ba9d8fef46e772d348727", null ],
+    [ "obsidian", "group__predefined__materials.html#ga5e54b1f1bcb72074bf4f98939bc58efb", null ],
+    [ "pearl", "group__predefined__materials.html#ga0445270e6b0695900be700548f0a9bd8", null ],
+    [ "red_plastic", "group__predefined__materials.html#gac4acd432f5065a7b2c6d7a5d7b98630c", null ],
+    [ "red_rubber", "group__predefined__materials.html#ga54b84389542ce92948548abbdebf43fc", null ],
+    [ "ruby", "group__predefined__materials.html#gac5cb07d75ab970006d65c97af242af3e", null ],
+    [ "silver", "group__predefined__materials.html#ga1ed20d1614988d12890988d34fdc6f3c", null ],
+    [ "turquoise", "group__predefined__materials.html#gaf3ce14ba90318b7e28d22756abc5b648", null ],
+    [ "white_plastic", "group__predefined__materials.html#gafbfc80b2ec5540bc6da0235341c9e910", null ],
+    [ "white_rubber", "group__predefined__materials.html#ga4c18e2ecb36c87caf26c5551d9697e4b", null ],
+    [ "yellow_plastic", "group__predefined__materials.html#ga5cd07c5c0306edd3e076d98abe7f6342", null ],
+    [ "yellow_rubber", "group__predefined__materials.html#gab53880b69ce117b8a6afb28bb1ecc902", null ]
+];

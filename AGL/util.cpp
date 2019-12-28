@@ -2,14 +2,16 @@
 #include<sstream>
 #include<fstream>
 
-GLuint agl::loadShaders(const char* vertShader, const char* fragShader)
+namespace agl {
+GLuint loadShaders(std::string vertShader, std::string fragShader)
 {
     GLuint vsID = glCreateShader(GL_VERTEX_SHADER),
            fsID = glCreateShader(GL_FRAGMENT_SHADER);
     GLint res = GL_FALSE;
     int logLen;
 
-    glShaderSource(vsID, 1, &vertShader, nullptr);
+    const char *code = vertShader.c_str();
+    glShaderSource(vsID, 1, &code, nullptr);
     glCompileShader(vsID);
     glGetShaderiv(vsID, GL_COMPILE_STATUS, &res);
     glGetShaderiv(vsID, GL_INFO_LOG_LENGTH, &logLen);
@@ -20,7 +22,8 @@ GLuint agl::loadShaders(const char* vertShader, const char* fragShader)
         printf("Error in loading vertex shader.\n%s\n", errMsg);
     }
 
-    glShaderSource(fsID, 1, &fragShader, nullptr);
+    code = fragShader.c_str();
+    glShaderSource(fsID, 1, &code, nullptr);
     glCompileShader(fsID);
     glGetShaderiv(fsID, GL_COMPILE_STATUS, &res);
     glGetShaderiv(fsID, GL_INFO_LOG_LENGTH, &logLen);
@@ -49,30 +52,22 @@ GLuint agl::loadShaders(const char* vertShader, const char* fragShader)
     glDeleteShader(fsID);
     return progID;
 }
-
-GLuint agl::loadShadersFromFile(const char* vsPath, const char* fsPath)
+GLuint loadShadersFromFile(const char* vsPath, const char* fsPath)
 {
-    std::string vertShader, fragShader;
-    std::ifstream fv(vsPath, std::ios::in);
-    if(fv.is_open())
-    {
-        std::stringstream ss;
-        ss << fv.rdbuf();
-        vertShader = ss.str();
-        fv.close();
-    }
-    std::ifstream ff(fsPath, std::ios::in);
-    if(ff.is_open())
-    {
-        std::stringstream ss;
-        ss << ff.rdbuf();
-        fragShader = ss.str();
-        ff.close();
-    }
-    return loadShaders(vertShader.c_str(), fragShader.c_str());
+    return loadShaders(readTextFile(vsPath), readTextFile(fsPath));
 }
-
-void agl::saveImage(const char *path, int w, int h)
+std::string readTextFile(const char *path)
+{
+    std::stringstream ss;
+    std::ifstream f(path, std::ios::in);
+    if(f.is_open())
+    {
+        ss << f.rdbuf();
+        f.close();
+    }
+    return ss.str();
+}
+void saveImage(const char *path, int w, int h)
 {
     std::ofstream fp(path);
     fp << "P6 " << std::to_string(w) << " " << std::to_string(h) << " 255 ";
@@ -82,4 +77,5 @@ void agl::saveImage(const char *path, int w, int h)
         for(int j=0, l=w*3; j<l; ++j)
             fp << data[i][j];
     fp.close();
+}
 }

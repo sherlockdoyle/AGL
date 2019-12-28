@@ -1,7 +1,7 @@
 #include<ctime>
 #include "../AGL/agl.h"
 
-int main_()
+int main_cubes()
 {
     std::srand(std::time(0));  // set random seed
     std::vector<agl::Material> materials{agl::Material::emerald, agl::Material::jade, agl::Material::obsidian,

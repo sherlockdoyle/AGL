@@ -5,5 +5,6 @@
 #include "scene.h"
 #include "entity.h"
 #include "shapes.h"
+#include "loader.h"
 
 #endif // AGL_H
