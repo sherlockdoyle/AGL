@@ -103,6 +103,8 @@ $(document).ready(function(){initNavTree('classagl_1_1Material.html','');});
 Collaboration diagram for Material:</div>
 <div class="dyncontent">
 <div class="center"><img src="classagl_1_1Material__coll__graph.png" border="0" usemap="#Material_coll__map" alt="Collaboration graph"/></div>
+<map name="Material_coll__map" id="Material_coll__map">
+</map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -140,7 +142,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a7149c958998f5997914daac672457610"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a shader algorithmically.  <a href="#a7149c958998f5997914daac672457610">More...</a><br /></td></tr>
 <tr class="separator:a7149c958998f5997914daac672457610"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3fecb036c4f263cbed932b5232f46308"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classagl_1_1Material.html#a3fecb036c4f263cbed932b5232f46308">setShader</a> (std::string vertexShader, std::string fragmentShader)</td></tr>
-<tr class="memdesc:a3fecb036c4f263cbed932b5232f46308"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile and set the shader for the maerial.  <a href="#a3fecb036c4f263cbed932b5232f46308">More...</a><br /></td></tr>
+<tr class="memdesc:a3fecb036c4f263cbed932b5232f46308"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile and set the shader for the material.  <a href="#a3fecb036c4f263cbed932b5232f46308">More...</a><br /></td></tr>
 <tr class="separator:a3fecb036c4f263cbed932b5232f46308"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
@@ -272,11 +274,11 @@ Static Public Attributes</h2></td></tr>
 <div class="textblock"><p><a class="el" href="classagl_1_1Material.html" title="Material class for entities. ">Material</a> class for entities. </p>
 <p>This class defines the kind of material used by the shader to render the <a class="el" href="classagl_1_1Entity.html" title="The Entity; basically all visible objects in AGL. ">Entity</a>. It defines several different components (emission, ambient, diffuse and specular) for the materials or a single texture. Each of the components can be a valid color or a special color.</p>
 <h2>Special Colors</h2>
-<p>AGL supports several special colors for the materials. This allows for procedurally generated textures for the rendering. These colors are defined with a negative alpha value for the components. Each of these color can take several parameters, defined by values in the rgb part of the colors. These colors are hardcoded in the generated shaders, ie. they can't be animated without recreating the shaders. Available special colors are:</p>
+<p>AGL supports several special colors for the materials. This allows for procedurally generated textures for the rendering. These colors are defined with a negative alpha value for the components. Each of these color can take several parameters, defined by values in the rgb part of the colors. These colors are hard-coded in the generated shaders, ie. they can't be animated without recreating the shaders. Available special colors are:</p>
 <h3>Position based color</h3>
-<p>This is enabled by <a class="el" href="util_8h.html#a0ceb13b100441ffdc180eb0374462b04" title="Position based color. ">AGL_COLOR_POS2RGB</a>. The position of the fragment is mapped to a color for the same. All the fragments are scalled between 0 to 1 and the value is used as RGB. The R, G, and B part of the color must be -1 for the corresponding coordinates (x, y, and z) to contribute to the final color. If not -1, the value is used as-is in the final color.</p>
+<p>This is enabled by <a class="el" href="util_8h.html#a0ceb13b100441ffdc180eb0374462b04" title="Position based color. ">AGL_COLOR_POS2RGB</a>. The position of the fragment is mapped to a color for the same. All the fragments are scaled between 0 to 1 and the value is used as RGB. The R, G, and B part of the color must be -1 for the corresponding coordinates (x, y, and z) to contribute to the final color. If not -1, the value is used as-is in the final color.</p>
 <h3>Normal based color</h3>
-<p>This is enabled by <a class="el" href="util_8h.html#ad433fb228500744ed9fd6a77ae939ac8" title="Normal based color. ">AGL_COLOR_NORM2RGB</a>. The normal of the fragment is mapped to a color for the same. This mode requires that the normal is included with the buffers. The x, y, and z componenyts of the normal is directly used for the R, G, and B components of the color.</p>
+<p>This is enabled by <a class="el" href="util_8h.html#ad433fb228500744ed9fd6a77ae939ac8" title="Normal based color. ">AGL_COLOR_NORM2RGB</a>. The normal of the fragment is mapped to a color for the same. This mode requires that the normal is included with the buffers. The x, y, and z components of the normal is directly used for the R, G, and B components of the color.</p>
 <h3>Checkerboard pattern</h3>
 <p>This is enabled by <a class="el" href="util_8h.html#a1885c42e56a4bc25ab63ab80899cc52c" title="Checker board pattern. ">AGL_COLOR_CHECKER</a>. The position of the fragment is used to generate either black or white color to give a checkerboard pattern finally. The R, G, or B component must be set to -1 to use the same for the color calculation. If set to anything else, they're ignored. The equation used is \(\left(\sum_{i\text{th component of color is -1}} \left\lfloor\text{normal}_i\right\rfloor\right) \mod 2\).</p>
 <h3>Example</h3>
@@ -624,7 +626,7 @@ Static Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Compile and set the shader for the maerial. </p>
+<p>Compile and set the shader for the material. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">vertexShader</td><td>Vertex shader. </td></tr>

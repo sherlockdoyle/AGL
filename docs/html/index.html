@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>AGL: Main Page</title>
+<title>AGL: AGL</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -88,10 +88,34 @@ $(document).ready(function(){initNavTree('index.html','');});
 
 <div class="header">
   <div class="headertitle">
-<div class="title">AGL Documentation</div>  </div>
+<div class="title">AGL </div>  </div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+<div class="textblock"><p>AGL stands for auto-GL, a 3D graphics library written in C++. It is dedicated to creating 3D graphics with OpenGL while abstracting the complex parts.</p>
+<h2>Dependency</h2>
+<p>AGL depends on</p><ul>
+<li>OpenGL version 3.0 or above (3.3 used as default)</li>
+<li>GLFW (needs installation)</li>
+<li>GLM (provided)</li>
+</ul>
+<p>AGL intends to be a low requirements library. You'll only need to install GLFW to get it working.</p>
+<h2>Getting Started</h2>
+<p>Start by installing <a href="https://www.glfw.org/">GLFW</a> for your system. Clone or download and extract the <a href="https://github.com/sherlockdoyle/AGL">repository</a>. You'll find all the header and source codes in the <code>AGL</code> directory. The compiled library will be in <code>build</code>. Add them to your build system - you can either add the header files and the library for linking or just the headers and the source codes for recompilation.</p>
+<h3>First code</h3>
+<p>Several examples are available in the <code>test</code> folder. For this first code we'll create a new file inside this this folder. Start by creating a file <code>first_cube.cpp</code>, and add the following lines. </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;../AGL/agl.h&quot;</span>  <span class="comment">// Include the header file. This is all you need to get started.</span></div><div class="line"></div><div class="line"><span class="keywordtype">int</span> main()</div><div class="line">{</div><div class="line">    <a class="code" href="classagl_1_1Scene.html">agl::Scene</a> scene;  <span class="comment">// Create your first scene. Everything in AGL is defined in the agl namespace.</span></div><div class="line"></div><div class="line">    <a class="code" href="classagl_1_1Entity.html">agl::Entity</a> <a class="code" href="group__shapes.html#ga4e407a74e8a76f39ba01b4926864f18c">cube</a> = <a class="code" href="group__shapes.html#ga4e407a74e8a76f39ba01b4926864f18c">agl::cube</a>();                  <span class="comment">// Create a cube to display.</span></div><div class="line">    cube.<a class="code" href="classagl_1_1Entity.html#a9125bed39e4fb621f8731a0a9e635a09">material</a>.<a class="code" href="classagl_1_1Material.html#adaedb88741cb8d984175cfa1ad7d6728">emission</a> = glm::vec4(1, 0, 0, 1);  <span class="comment">// Add some red color to the cube. The color is in RGBA format.</span></div><div class="line">    scene.<a class="code" href="classagl_1_1Scene.html#aac28674c8f7689b63fce92d69cc4a509">add</a>(cube);                                 <span class="comment">// Add the cube to the scene.</span></div><div class="line"></div><div class="line">    scene.<a class="code" href="classagl_1_1Scene.html#a1825b40ca3bc3a1ba67fdb58fac5015c">prepare</a>();        <span class="comment">// You don&#39;t need to understand anything about this.</span></div><div class="line">    <span class="keywordflow">while</span>(scene.<a class="code" href="classagl_1_1Scene.html#a56015385cd7137607aea8d34af868524">render</a>());  <span class="comment">// Render the scene. To close the window, press Esc.</span></div><div class="line"></div><div class="line">    <span class="keywordflow">return</span> 0;</div><div class="line">}</div></div><!-- fragment --><p> Once you've saved the file, open a terminal and navigate to this folder. Compile the file with (assuming you've GCC installed) </p><div class="fragment"><div class="line">g++ first_cube.cpp ../build/libAGL.a -lGL -lglfw</div></div><!-- fragment --><p> then run it with <code>./a.out</code>. Once the code runs without any errors, you'll see a red colored cube on a black background on the screen, like the image below.</p>
+<div class="image">
+<img src="mainpage_img1.png" alt="mainpage_img1.png"/>
+<div class="caption">
+Red cube on a black background</div></div>
+ <h3>Second code</h3>
+<p>In our first code we created a simple cube. But it had no depth, just looked like an irregular hexagon. Next, we'll add some lights, hence some depths. Create another file <code>lighted_cube.cpp</code> and add the following codes. </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;../AGL/agl.h&quot;</span>  <span class="comment">// Include the header file.</span></div><div class="line"></div><div class="line"><span class="keywordtype">int</span> main()</div><div class="line">{</div><div class="line">    <a class="code" href="classagl_1_1Scene.html">agl::Scene</a> scene;  <span class="comment">// Create your second scene.</span></div><div class="line"></div><div class="line">    <a class="code" href="classagl_1_1Entity.html">agl::Entity</a> cube = <a class="code" href="group__shapes.html#ga4e407a74e8a76f39ba01b4926864f18c">agl::cube</a>();               <span class="comment">// Create the cube.</span></div><div class="line">    cube.<a class="code" href="classagl_1_1Entity.html#a9125bed39e4fb621f8731a0a9e635a09">material</a> = <a class="code" href="group__predefined__materials.html#ga06568e5aece0fb612cbd07042a30e877">agl::Material::green_rubber</a>;  <span class="comment">// This time we will not add any color. We&#39;ll directly use a predefined material.</span></div><div class="line">    scene.<a class="code" href="classagl_1_1Scene.html#aac28674c8f7689b63fce92d69cc4a509">add</a>(cube);                              <span class="comment">// Add the cube to the scene.</span></div><div class="line"></div><div class="line">    <a class="code" href="classagl_1_1Light.html">agl::Light</a> light(glm::vec3(-2, 3, 2),     <span class="comment">// Create a white light positioned at (-2, 3, 2).</span></div><div class="line">                     glm::vec4(1, 1, 1, 1));  <span class="comment">// The second parameter is the color.</span></div><div class="line">    scene.<a class="code" href="classagl_1_1Scene.html#aac28674c8f7689b63fce92d69cc4a509">add</a>(light);      <span class="comment">// Add the light to the scene.</span></div><div class="line">    scene.<a class="code" href="classagl_1_1Scene.html#a2de412fe7888bde591d508fca0d177b3">enableLights</a>();  <span class="comment">// We need to enable lights for lighting calculations.</span></div><div class="line"></div><div class="line">    scene.<a class="code" href="classagl_1_1Scene.html#a1825b40ca3bc3a1ba67fdb58fac5015c">prepare</a>();        <span class="comment">// Still don&#39;t need to understand.</span></div><div class="line">    <span class="keywordflow">while</span>(scene.<a class="code" href="classagl_1_1Scene.html#a56015385cd7137607aea8d34af868524">render</a>());  <span class="comment">// Render the scene. You know how to close the window.</span></div><div class="line"></div><div class="line">    <span class="keywordflow">return</span> 0;</div><div class="line">}</div></div><!-- fragment --><p> Compile and run this code. You should see something like the image below.</p>
+<div class="image">
+<img src="mainpage_img2.png" alt="mainpage_img2.png"/>
+<div class="caption">
+Green rubber cube with light</div></div>
+ <h3>What next?</h3>
+<p>Add the following line inside the <code>while</code> loop and create your first animation. </p><div class="fragment"><div class="line">scene.camera.rotateY(0.01);</div></div><!-- fragment --><p> <b>Then?</b> Check the tutorials for more awesomeness. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

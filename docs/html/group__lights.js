@@ -1,8 +1,8 @@
 var group__lights =
 [
     [ "Light", "classagl_1_1Light.html", [
-      [ "Light", "classagl_1_1Light.html#af4b51d9a63325d232534bc0f86fb1a95", null ],
-      [ "Light", "classagl_1_1Light.html#a9dc175ba0423537accc07eb7842750c6", null ],
+      [ "Light", "classagl_1_1Light.html#a40b83ab902e78955c1e22314e9f1b405", null ],
+      [ "Light", "classagl_1_1Light.html#ae2f4517ec9f4b0b850f72c844a6162a0", null ],
       [ "getPos", "classagl_1_1Light.html#aab74ee491fc39c620a9e861ff068dc9e", null ],
       [ "setColor", "classagl_1_1Light.html#a780508b8a6a53b248ba933c5a67c6a6d", null ],
       [ "setColor", "classagl_1_1Light.html#a33e2ee8f93d39e383b0d2144e96eb04f", null ],

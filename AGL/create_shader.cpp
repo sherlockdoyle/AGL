@@ -44,7 +44,7 @@ void setColorComp(const char *comp, glm::vec4 color, Entity *e, std::stringstrea
         break;
     }
 }
-void setupColors(Material *m, Entity *e, std::stringstream &fs, bool lightsEnabled, bool norm, bool tex)
+void setupColors(Material *m, Entity *e, std::stringstream &fs, bool lightsEnabled, bool tex)
 {
     if(tex)
         if(lightsEnabled)
@@ -138,7 +138,7 @@ std::pair<std::string, std::string> Material::createShader(Entity *e, std::vecto
  fs << "    vec3 norm = normalize(" << (norm ? "norm" : "cross(dFdx(fpos), dFdy(fpos))") << "),\n"
        "         viewDir = normalize(vpos - fpos), lightDir;\n"
        "    vec4 result = vec4(0);\n";
-        setupColors(this, e, fs, true, norm, tex);
+        setupColors(this, e, fs, true, tex);
  fs << "    for(int i=0; i<" << lights.size() << "; ++i)\n    {\n"
        "        lightDir = normalize(lights[i].position.w==0 ? -lights[i].position.xyz : (lights[i].position.xyz - fpos));\n"
        "        float spotlight = 1, d, attenuation;\n"
@@ -159,11 +159,11 @@ std::pair<std::string, std::string> Material::createShader(Entity *e, std::vecto
     }
     else  // ----------no lights----------
     {
-        setupColors(this, e, fs, false, norm, tex);
+        setupColors(this, e, fs, false, tex);
         fs << "    color = emission;\n";
     }
     fs << "}";
-    std::cout << vs.str() << std::endl << fs.str() <<std::endl;
+//    std::cout << vs.str() << std::endl << fs.str() <<std::endl;
     return std::pair<std::string, std::string>(vs.str(), fs.str());
 }
 }

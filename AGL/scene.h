@@ -11,7 +11,7 @@ namespace agl {
 /*!
  * \brief Camera class for the scene
  *
- * Camera controlls the positioning of the camera for the scene. It controlls the rotation of the camera, up-vectors,
+ * Camera controls the positioning of the camera for the scene. It controls the rotation of the camera, up-vectors,
  * positioning, etc. This class handles the V part of the MVP matrix.
  */
 class Camera
@@ -82,7 +82,7 @@ public:
      * \param mat The view matrix.
      *
      * This method can be used to set the view matrix manually, but it'll set #_pos, #_lookAt and #_up to \c nan.
-     * Extracting these informations from the matrix is not supported currently.
+     * Extracting these information from the matrix is not supported currently.
      */
     void setView(const glm::mat4 &mat);
     /*!
@@ -106,8 +106,8 @@ public:
      * \brief Rotate around the x-axis.
      * \param rad Angle to rotate by, in radians.
      * \param around See #rotate.
-     * \param safe Rotations beyound 90 degree along the x-axis might cause the render to flip abruptly. Setting this to
-     * \c true tries to prevent that. However, it isn't guaranteed that this'll work.
+     * \param safe Rotations beyond 90 degree along the x-axis might cause the render to flip abruptly. Setting this to
+     * \c true tries to prevent that. However, it isn't guaranteed that this will work.
      */
     void rotateX(float rad=0, bool around=true, bool safe=true);
     /*!
@@ -136,7 +136,7 @@ public:
     void translate(float dx=0, float dy=0, float dz=0);
 
     /*!
-     * \name View transfomations
+     * \name View transformations
      * These methods applies transformations directly to the view matrix. It is advised that you do not use these
      * methods. These methods do not modify either of #_pos, #_lookAt or #_up. All of these are left handed, ie. these
      * are applied on the current transformed matrix.
@@ -186,7 +186,7 @@ public:
  *
  * The Scene class holds the camera, all the entities that need to be displayed, the lights and much more. The Scene
  * creates a [GLFW](https://www.glfw.org/) window to display the rendered contents. The Scene can be controlled with
- * user inputs (default controlls inbuilt). This class also contains the projection matrix, the P part of the MVP matrix.
+ * user inputs (default controls inbuilt). This class also contains the projection matrix, the P part of the MVP matrix.
  */
 class Scene
 {
@@ -257,8 +257,8 @@ public:
      * \param windowSizeCallback Called if the window is resized.
      *
      * This is used to set several callbacks for the scene. Several callbacks are already set when the scene is created.
-     * This can be used to add more controlls for the user. If any of the parameter is \c null, the old value, if one
-     * was there, is retained.
+     * This can be used to add more controls for the user. If any of the parameter is \c null, the old value, if one was
+     * there, is retained.
      *
      * \sa defKeyCB defScrollCB defWindowSizeCB
      */
@@ -295,12 +295,13 @@ public:
     void prepare();
     /*!
      * \brief Render the scene.
+     * \return Returns \c false, if the #window should close, \c true otherwise.
      *
      * This method actually renders everything on the window. This loads the required buffers and shaders, sets the
      * parameters, etc. This method must be called each time in the rendering loop to update the scene, say for
-     * animations.
+     * animations. The return value of this method can be used as the condition for the render loop.
      */
-    void render();
+    bool render();
     /*!
      * \brief Get the view-projection matrix.
      * \return The VP part of the MVP matrix.
@@ -317,10 +318,10 @@ private:
      */
     int setupGL(const char *name);
     /*!
-     * \brief Seperates the Entity and Light into #entities and #lights.
+     * \brief Separates the Entity and Light into #entities and #lights.
      * \param children The children tree.
      *
-     * This method runs a recursive DFS on all the children to seperate all the Entity and Light.
+     * This method runs a recursive DFS on all the children to separate all the Entity and Light.
      */
     void getAllEntity(std::vector<BaseEntity*> &children);
 };
@@ -342,7 +343,7 @@ void defKeyCB(GLFWwindow* window, int key, int scancode, int action, int mods);
 /*!
  * \brief Default scroll callback.
  *
- * This rotates the camera in the direction of the scroll. This works best with touchpads.
+ * This rotates the camera in the direction of the scroll. This works best with touch pads.
  */
 void defScrollCB(GLFWwindow* window, double xoffset, double yoffset);
 /*!

@@ -1,5 +1,7 @@
 *.pro
 *.pro.user
-build/
 build_test/
 img/
+
+*.out
+test/first_code.cpp

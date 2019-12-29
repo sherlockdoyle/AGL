@@ -50,8 +50,8 @@ void saveImage(const char* path, int w, int h);
  * @{
  */
 #define AGL_SAMPLE_SIZE 4  //!< Samples to take per pixel for [anti-aliasing](https://en.wikipedia.org/wiki/Anti-aliasing).
-#define AGL_GLVERSION_MAJOR 4  //!< OpenGL major version.
-#define AGL_GLVERSION_MINOR 5  //!< OpenGL minor version.
+#define AGL_GLVERSION_MAJOR 3  //!< OpenGL major version.
+#define AGL_GLVERSION_MINOR 3  //!< OpenGL minor version.
 
 #define AGL_GLFW_INIT_ERROR 1  //!< Error if GLFW was not initialised.
 #define AGL_GLFW_CREATE_WINDOW_ERROR 2  //!< Error if window was not created.

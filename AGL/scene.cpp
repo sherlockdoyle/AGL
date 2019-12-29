@@ -105,7 +105,7 @@ void Scene::prepare()
         }
     }
 }
-void Scene::render()
+bool Scene::render()
 {
     std::stringstream lt;
     glm::mat4 vp = getMatVP();
@@ -167,6 +167,7 @@ void Scene::render()
 
     glfwSwapBuffers(window);
     glfwPollEvents();
+    return glfwWindowShouldClose(window) == 0;
 }
 void Scene::setCamera(const glm::vec3 &pos, const glm::vec3 &lookAt, const glm::vec3 &up)
 {

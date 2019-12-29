@@ -149,7 +149,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac48feb217e1888c4a19980f98a50ce3c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classagl_1_1Camera.html#ac48feb217e1888c4a19980f98a50ce3c">setUp</a> (float x=0, float y=1, float z=0)</td></tr>
 <tr class="memdesc:ac48feb217e1888c4a19980f98a50ce3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the up-vector.  <a href="#ac48feb217e1888c4a19980f98a50ce3c">More...</a><br /></td></tr>
 <tr class="separator:ac48feb217e1888c4a19980f98a50ce3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader">View transfomations</div></td></tr>
+<tr><td colspan="2"><div class="groupHeader">View transformations</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><p>These methods applies transformations directly to the view matrix. It is advised that you do not use these methods. These methods do not modify either of <a class="el" href="classagl_1_1Camera.html#a99b12fb9b3a86f01973bcd88f0e72b25" title="The position of the camera. ">_pos</a>, <a class="el" href="classagl_1_1Camera.html#a0d3bddd63ba6b2ec2962eb26c8dc5aa0" title="The point the camera looks at. ">_lookAt</a> or <a class="el" href="classagl_1_1Camera.html#a89606200062350da1c39528edc698f56" title="The up vector for the camera. ">_up</a>. All of these are left handed, ie. these are applied on the current transformed matrix. </p>
 </div></td></tr>
 <tr class="memitem:afc658c2c48098b611ceebe01444a70cb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classagl_1_1Camera.html#afc658c2c48098b611ceebe01444a70cb">viewTranslate</a> (const glm::vec3 &amp;d=glm::vec3(0))</td></tr>
@@ -188,7 +188,7 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classagl_1_1Camera.html" title="Camera class for the scene. ">Camera</a> class for the scene. </p>
-<p><a class="el" href="classagl_1_1Camera.html" title="Camera class for the scene. ">Camera</a> controlls the positioning of the camera for the scene. It controlls the rotation of the camera, up-vectors, positioning, etc. This class handles the V part of the MVP matrix. </p>
+<p><a class="el" href="classagl_1_1Camera.html" title="Camera class for the scene. ">Camera</a> controls the positioning of the camera for the scene. It controls the rotation of the camera, up-vectors, positioning, etc. This class handles the V part of the MVP matrix. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="adb8a4aaf120f0434262acb7f46410b62"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adb8a4aaf120f0434262acb7f46410b62">&#9670;&nbsp;</a></span>Camera()</h2>
@@ -425,7 +425,7 @@ Public Attributes</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">rad</td><td>Angle to rotate by, in radians. </td></tr>
     <tr><td class="paramname">around</td><td>See <a class="el" href="classagl_1_1Camera.html#a1c86c230a6175e2868938b7b91746589" title="Rotate the camera. ">rotate</a>. </td></tr>
-    <tr><td class="paramname">safe</td><td>Rotations beyound 90 degree along the x-axis might cause the render to flip abruptly. Setting this to <code>true</code> tries to prevent that. However, it isn't guaranteed that this'll work. </td></tr>
+    <tr><td class="paramname">safe</td><td>Rotations beyond 90 degree along the x-axis might cause the render to flip abruptly. Setting this to <code>true</code> tries to prevent that. However, it isn't guaranteed that this will work. </td></tr>
   </table>
   </dd>
 </dl>
@@ -669,7 +669,7 @@ Public Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p>This method can be used to set the view matrix manually, but it'll set <a class="el" href="classagl_1_1Camera.html#a99b12fb9b3a86f01973bcd88f0e72b25" title="The position of the camera. ">_pos</a>, <a class="el" href="classagl_1_1Camera.html#a0d3bddd63ba6b2ec2962eb26c8dc5aa0" title="The point the camera looks at. ">_lookAt</a> and <a class="el" href="classagl_1_1Camera.html#a89606200062350da1c39528edc698f56" title="The up vector for the camera. ">_up</a> to <code>nan</code>. Extracting these informations from the matrix is not supported currently. </p>
+<p>This method can be used to set the view matrix manually, but it'll set <a class="el" href="classagl_1_1Camera.html#a99b12fb9b3a86f01973bcd88f0e72b25" title="The position of the camera. ">_pos</a>, <a class="el" href="classagl_1_1Camera.html#a0d3bddd63ba6b2ec2962eb26c8dc5aa0" title="The point the camera looks at. ">_lookAt</a> and <a class="el" href="classagl_1_1Camera.html#a89606200062350da1c39528edc698f56" title="The up vector for the camera. ">_up</a> to <code>nan</code>. Extracting these information from the matrix is not supported currently. </p>
 
 </div>
 </div>

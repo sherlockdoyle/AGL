@@ -3,7 +3,7 @@
 #include "../AGL/glm/gtc/random.hpp"
 #include "../AGL/glm/gtc/matrix_transform.hpp"
 
-int main()
+int main_glowing_cubes()
 {
     std::srand(std::time(0));  // set random seed
     agl::Scene scene;  // create the scene

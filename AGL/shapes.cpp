@@ -87,8 +87,10 @@ Entity octahedron()
 }
 Entity dodecahedron()  // TODO: Correctly orrient vertices
 {
+//! \cond
 #define P 1.618033988749894848204586834365638117720309179805762862135
 #define Q 0.618033988749894848204586834365638117720309179805762862135
+//! \endcond
     Entity e;
     float verts[] = { 1, 1, 1,     1, 1,-1,     1,-1, 1,     1,-1,-1,
                      -1, 1, 1,    -1, 1,-1,    -1,-1, 1,    -1,-1,-1,

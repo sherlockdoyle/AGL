@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['light',['Light',['../classagl_1_1Light.html',1,'Light'],['../classagl_1_1Light.html#af4b51d9a63325d232534bc0f86fb1a95',1,'agl::Light::Light(const glm::vec3 &amp;pos=glm::vec3(0), const glm::vec4 &amp;color=glm::vec4(1))'],['../classagl_1_1Light.html#a9dc175ba0423537accc07eb7842750c6',1,'agl::Light::Light(const glm::vec3 &amp;pos=glm::vec3(0), float r=1, float g=1, float b=1, float a=1)']]],
+  ['light',['Light',['../classagl_1_1Light.html',1,'Light'],['../classagl_1_1Light.html#a40b83ab902e78955c1e22314e9f1b405',1,'agl::Light::Light(const glm::vec3 &amp;pos=glm::vec3(-2, 3, 2), const glm::vec4 &amp;color=glm::vec4(1))'],['../classagl_1_1Light.html#ae2f4517ec9f4b0b850f72c844a6162a0',1,'agl::Light::Light(const glm::vec3 &amp;pos=glm::vec3(-2, 3, 2), float r=1, float g=1, float b=1, float a=1)']]],
   ['lights',['lights',['../classagl_1_1Scene.html#a0e64cfc7e2ef77284730599c9505a095',1,'agl::Scene::lights()'],['../group__lights.html',1,'(Global Namespace)']]],
   ['lightsenabled',['lightsEnabled',['../classagl_1_1Material.html#a8503a68d2e66fcce55aeb3668f92de4d',1,'agl::Material']]],
   ['linearattenuation',['linearAttenuation',['../classagl_1_1Light.html#af57b112d656ef887c7ddb19820dd5014',1,'agl::Light']]],

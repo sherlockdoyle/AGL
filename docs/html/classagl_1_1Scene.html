@@ -144,9 +144,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1825b40ca3bc3a1ba67fdb58fac5015c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classagl_1_1Scene.html#a1825b40ca3bc3a1ba67fdb58fac5015c">prepare</a> ()</td></tr>
 <tr class="memdesc:a1825b40ca3bc3a1ba67fdb58fac5015c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare the scene before rendering.  <a href="#a1825b40ca3bc3a1ba67fdb58fac5015c">More...</a><br /></td></tr>
 <tr class="separator:a1825b40ca3bc3a1ba67fdb58fac5015c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d9edd8b0a8d0d2f737eb5ee0b0a5040"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classagl_1_1Scene.html#a7d9edd8b0a8d0d2f737eb5ee0b0a5040">render</a> ()</td></tr>
-<tr class="memdesc:a7d9edd8b0a8d0d2f737eb5ee0b0a5040"><td class="mdescLeft">&#160;</td><td class="mdescRight">Render the scene.  <a href="#a7d9edd8b0a8d0d2f737eb5ee0b0a5040">More...</a><br /></td></tr>
-<tr class="separator:a7d9edd8b0a8d0d2f737eb5ee0b0a5040"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56015385cd7137607aea8d34af868524"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classagl_1_1Scene.html#a56015385cd7137607aea8d34af868524">render</a> ()</td></tr>
+<tr class="memdesc:a56015385cd7137607aea8d34af868524"><td class="mdescLeft">&#160;</td><td class="mdescRight">Render the scene.  <a href="#a56015385cd7137607aea8d34af868524">More...</a><br /></td></tr>
+<tr class="separator:a56015385cd7137607aea8d34af868524"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20c146f2e75afe6025af38efcb3e9a08"><td class="memItemLeft" align="right" valign="top">glm::mat4&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classagl_1_1Scene.html#a20c146f2e75afe6025af38efcb3e9a08">getMatVP</a> ()</td></tr>
 <tr class="memdesc:a20c146f2e75afe6025af38efcb3e9a08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the view-projection matrix.  <a href="#a20c146f2e75afe6025af38efcb3e9a08">More...</a><br /></td></tr>
 <tr class="separator:a20c146f2e75afe6025af38efcb3e9a08"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -172,15 +172,15 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a80de27bd7dc4e2b2ad3d5895b97a70f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The GLFW window for displaying everything.  <a href="#a80de27bd7dc4e2b2ad3d5895b97a70f0">More...</a><br /></td></tr>
 <tr class="separator:a80de27bd7dc4e2b2ad3d5895b97a70f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad38fb8e36891c8d119bf36d044a7ae87"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="classagl_1_1Entity.html">Entity</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classagl_1_1Scene.html#ad38fb8e36891c8d119bf36d044a7ae87">entities</a></td></tr>
-<tr class="memdesc:ad38fb8e36891c8d119bf36d044a7ae87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Temporary store all the <a class="el" href="classagl_1_1Entity.html" title="The Entity; basically all visible objects in AGL. ">Entity</a> before <a class="el" href="classagl_1_1Scene.html#a7d9edd8b0a8d0d2f737eb5ee0b0a5040" title="Render the scene. ">render</a>.  <a href="#ad38fb8e36891c8d119bf36d044a7ae87">More...</a><br /></td></tr>
+<tr class="memdesc:ad38fb8e36891c8d119bf36d044a7ae87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Temporary store all the <a class="el" href="classagl_1_1Entity.html" title="The Entity; basically all visible objects in AGL. ">Entity</a> before <a class="el" href="classagl_1_1Scene.html#a56015385cd7137607aea8d34af868524" title="Render the scene. ">render</a>.  <a href="#ad38fb8e36891c8d119bf36d044a7ae87">More...</a><br /></td></tr>
 <tr class="separator:ad38fb8e36891c8d119bf36d044a7ae87"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e64cfc7e2ef77284730599c9505a095"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="classagl_1_1Light.html">Light</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classagl_1_1Scene.html#a0e64cfc7e2ef77284730599c9505a095">lights</a></td></tr>
-<tr class="memdesc:a0e64cfc7e2ef77284730599c9505a095"><td class="mdescLeft">&#160;</td><td class="mdescRight">Temporary store all the <a class="el" href="classagl_1_1Light.html" title="Light, adds reality to the scene. ">Light</a> before <a class="el" href="classagl_1_1Scene.html#a7d9edd8b0a8d0d2f737eb5ee0b0a5040" title="Render the scene. ">render</a>.  <a href="#a0e64cfc7e2ef77284730599c9505a095">More...</a><br /></td></tr>
+<tr class="memdesc:a0e64cfc7e2ef77284730599c9505a095"><td class="mdescLeft">&#160;</td><td class="mdescRight">Temporary store all the <a class="el" href="classagl_1_1Light.html" title="Light, adds reality to the scene. ">Light</a> before <a class="el" href="classagl_1_1Scene.html#a56015385cd7137607aea8d34af868524" title="Render the scene. ">render</a>.  <a href="#a0e64cfc7e2ef77284730599c9505a095">More...</a><br /></td></tr>
 <tr class="separator:a0e64cfc7e2ef77284730599c9505a095"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classagl_1_1Scene.html" title="Scene class, which holds everything. ">Scene</a> class, which holds everything. </p>
-<p>The <a class="el" href="classagl_1_1Scene.html" title="Scene class, which holds everything. ">Scene</a> class holds the camera, all the entities that need to be displayed, the lights and much more. The <a class="el" href="classagl_1_1Scene.html" title="Scene class, which holds everything. ">Scene</a> creates a <a href="https://www.glfw.org/">GLFW</a> window to display the rendered contents. The <a class="el" href="classagl_1_1Scene.html" title="Scene class, which holds everything. ">Scene</a> can be controlled with user inputs (default controlls inbuilt). This class also contains the projection matrix, the P part of the MVP matrix. </p>
+<p>The <a class="el" href="classagl_1_1Scene.html" title="Scene class, which holds everything. ">Scene</a> class holds the camera, all the entities that need to be displayed, the lights and much more. The <a class="el" href="classagl_1_1Scene.html" title="Scene class, which holds everything. ">Scene</a> creates a <a href="https://www.glfw.org/">GLFW</a> window to display the rendered contents. The <a class="el" href="classagl_1_1Scene.html" title="Scene class, which holds everything. ">Scene</a> can be controlled with user inputs (default controls inbuilt). This class also contains the projection matrix, the P part of the MVP matrix. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aa154fae38c63b4383a02745749a13e80"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa154fae38c63b4383a02745749a13e80">&#9670;&nbsp;</a></span>Scene()</h2>
@@ -338,14 +338,14 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a7d9edd8b0a8d0d2f737eb5ee0b0a5040"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7d9edd8b0a8d0d2f737eb5ee0b0a5040">&#9670;&nbsp;</a></span>render()</h2>
+<a id="a56015385cd7137607aea8d34af868524"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56015385cd7137607aea8d34af868524">&#9670;&nbsp;</a></span>render()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void render </td>
+          <td class="memname">bool render </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -354,7 +354,8 @@ Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Render the scene. </p>
-<p>This method actually renders everything on the window. This loads the required buffers and shaders, sets the parameters, etc. This method must be called each time in the rendering loop to update the scene, say for animations. </p>
+<dl class="section return"><dt>Returns</dt><dd>Returns <code>false</code>, if the <a class="el" href="classagl_1_1Scene.html#a80de27bd7dc4e2b2ad3d5895b97a70f0" title="The GLFW window for displaying everything. ">window</a> should close, <code>true</code> otherwise.</dd></dl>
+<p>This method actually renders everything on the window. This loads the required buffers and shaders, sets the parameters, etc. This method must be called each time in the rendering loop to update the scene, say for animations. The return value of this method can be used as the condition for the render loop. </p>
 
 </div>
 </div>
@@ -508,7 +509,7 @@ Public Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p>This is used to set several callbacks for the scene. Several callbacks are already set when the scene is created. This can be used to add more controlls for the user. If any of the parameter is <code>null</code>, the old value, if one was there, is retained.</p>
+<p>This is used to set several callbacks for the scene. Several callbacks are already set when the scene is created. This can be used to add more controls for the user. If any of the parameter is <code>null</code>, the old value, if one was there, is retained.</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="namespaceagl.html#a8246ba10111e1ede42c93c13637a21e5" title="Default callback for key press. ">defKeyCB</a> <a class="el" href="namespaceagl.html#a9d87db68fe426d4cf60db9c0fd589f80" title="Default scroll callback. ">defScrollCB</a> <a class="el" href="namespaceagl.html#adcb2bd69d1eeffb73ad4e725ac78e987" title="Default window resize callback. ">defWindowSizeCB</a> </dd></dl>
 
 </div>
@@ -726,7 +727,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Temporary store all the <a class="el" href="classagl_1_1Entity.html" title="The Entity; basically all visible objects in AGL. ">Entity</a> before <a class="el" href="classagl_1_1Scene.html#a7d9edd8b0a8d0d2f737eb5ee0b0a5040" title="Render the scene. ">render</a>. </p>
+<p>Temporary store all the <a class="el" href="classagl_1_1Entity.html" title="The Entity; basically all visible objects in AGL. ">Entity</a> before <a class="el" href="classagl_1_1Scene.html#a56015385cd7137607aea8d34af868524" title="Render the scene. ">render</a>. </p>
 
 </div>
 </div>
@@ -758,7 +759,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Temporary store all the <a class="el" href="classagl_1_1Light.html" title="Light, adds reality to the scene. ">Light</a> before <a class="el" href="classagl_1_1Scene.html#a7d9edd8b0a8d0d2f737eb5ee0b0a5040" title="Render the scene. ">render</a>. </p>
+<p>Temporary store all the <a class="el" href="classagl_1_1Light.html" title="Light, adds reality to the scene. ">Light</a> before <a class="el" href="classagl_1_1Scene.html#a56015385cd7137607aea8d34af868524" title="Render the scene. ">render</a>. </p>
 
 </div>
 </div>

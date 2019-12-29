@@ -6,7 +6,7 @@ var classagl_1_1Scene =
     [ "enableLights", "classagl_1_1Scene.html#a2de412fe7888bde591d508fca0d177b3", null ],
     [ "getMatVP", "classagl_1_1Scene.html#a20c146f2e75afe6025af38efcb3e9a08", null ],
     [ "prepare", "classagl_1_1Scene.html#a1825b40ca3bc3a1ba67fdb58fac5015c", null ],
-    [ "render", "classagl_1_1Scene.html#a7d9edd8b0a8d0d2f737eb5ee0b0a5040", null ],
+    [ "render", "classagl_1_1Scene.html#a56015385cd7137607aea8d34af868524", null ],
     [ "setBGcolor", "classagl_1_1Scene.html#a8bf744b71db35f55d289fe33f64015f4", null ],
     [ "setCamera", "classagl_1_1Scene.html#a5e2547e4bffb6fa28debe93516b2b597", null ],
     [ "setController", "classagl_1_1Scene.html#a0b0c1763ea42ee3c03e203af1ca65d3a", null ],

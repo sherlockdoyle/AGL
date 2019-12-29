@@ -22,18 +22,18 @@ class Scene;
  * ## Special Colors
  * AGL supports several special colors for the materials. This allows for procedurally generated textures for the
  * rendering. These colors are defined with a negative alpha value for the components. Each of these color can take
- * several parameters, defined by values in the rgb part of the colors. These colors are hardcoded in the generated
+ * several parameters, defined by values in the rgb part of the colors. These colors are hard-coded in the generated
  * shaders, ie. they can't be animated without recreating the shaders. Available special colors are:
  *
  * ### Position based color
  * This is enabled by #AGL_COLOR_POS2RGB. The position of the fragment is mapped to a color for the same. All the
- * fragments are scalled between 0 to 1 and the value is used as RGB. The R, G, and B part of the color must be -1 for
+ * fragments are scaled between 0 to 1 and the value is used as RGB. The R, G, and B part of the color must be -1 for
  * the corresponding coordinates (x, y, and z) to contribute to the final color. If not -1, the value is used as-is in
  * the final color.
  *
  * ### Normal based color
  * This is enabled by #AGL_COLOR_NORM2RGB. The normal of the fragment is mapped to a color for the same. This mode
- * requires that the normal is included with the buffers. The x, y, and z componenyts of the normal is directly used for
+ * requires that the normal is included with the buffers. The x, y, and z components of the normal is directly used for
  * the R, G, and B components of the color.
  *
  * ### Checkerboard pattern
@@ -138,7 +138,7 @@ public:
      */\
     virtual std::pair<std::string, std::string> createShader(Entity *e=nullptr, std::vector<Light*> lights=std::vector<Light*>());
     /*!
-     * \brief Compile and set the shader for the maerial.
+     * \brief Compile and set the shader for the material.
      * \param vertexShader Vertex shader.
      * \param fragmentShader Fragment shader.
      *
@@ -199,7 +199,7 @@ public:
                          merged;  //!< The final combination of vertices, normals, and uvs.
     std::vector<GLuint> indices;  //!< Indices
     glm::vec3 position;  //!< Position of the entity, the entity is centered here.
-    glm::mat4 model;  //!< The model matrix for the entity. This is the M part of the MVP matrix. This is  responsible for all the transformations of this entity.
+    glm::mat4 model;  //!< The model matrix for the entity. This is the M part of the MVP matrix. This is responsible for all the transformations of this entity.
     Material material;  //!< Material for shading this entity.
     std::vector<BaseEntity*> children;  //!< Children of this entity.
 
@@ -210,7 +210,7 @@ public:
     Entity(const glm::vec3 &pos=glm::vec3(0));
     /*!
      * \brief Create an entity from data copied from \a other.
-     * \param other Another entity for thr copy constructor.
+     * \param other Another entity for the copy constructor.
      */
     Entity(const Entity &other);
     ~Entity();
@@ -285,6 +285,14 @@ public:
  */
 /*!
  * \brief Light, adds reality to the scene.
+ *
+ * These are different kinds of lights that can be added to the scene. There are mainly three kinds of light,
+ * - **Point light:** Point lights are positioned and cast light in all directions. For a point light, the fourth
+ *   component of the #position vector should be 1.
+ * - **Directional light:** Directional lights originates at infinity and propagates straight in a certain direction.
+ *   For a directional light, the fourth component of the #position vector should be 0.
+ * - **Spotlight:** Spotlights are positioned and cast light in a cone. For a spotlight, the #spotCosCutoff should be
+ *   between 0 and 1.
  */
 class Light: virtual public BaseEntity
 {
@@ -309,7 +317,7 @@ public:
      *
      * \sa DirectionalLight
      */
-    Light(const glm::vec3 &pos=glm::vec3(0), const glm::vec4 &color=glm::vec4(1));
+    Light(const glm::vec3 &pos=glm::vec3(-2, 3, 2), const glm::vec4 &color=glm::vec4(1));
     /*!
      * \brief See #Light.
      * \param pos Position of the light.
@@ -318,7 +326,7 @@ public:
      * \param b Blue.
      * \param a Alpha.
      */
-    Light(const glm::vec3 &pos=glm::vec3(0), float r=1, float g=1, float b=1, float a=1);
+    Light(const glm::vec3 &pos=glm::vec3(-2, 3, 2), float r=1, float g=1, float b=1, float a=1);
     /*!
      * \brief Set color of the light.
      * \param color Color to set.
@@ -371,7 +379,7 @@ inline Light DirectionalLight(const glm::vec3 &dir=glm::vec3(0), float r=1, floa
 /*!
  * \brief A SharedEntity shares its data off another Entity.
  *
- * Since all entities need their seperate data, they also create their seperate buffers. Say, you've two cubes, they'll
+ * Since all entities need their separate data, they also create their separate buffers. Say, you've two cubes, they'll
  * have the same vertex data, but will be loaded twice. SharedEntity intends to optimize this by using the buffers from
  * another Entity whose data has already been loaded. The #source entity's buffers must have been created before
  * they can be used.
