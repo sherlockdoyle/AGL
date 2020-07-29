@@ -81,8 +81,9 @@ public:
      * \brief Set the view matrix.
      * \param mat The view matrix.
      *
-     * This method can be used to set the view matrix manually, but it'll set #_pos, #_lookAt and #_up to \c nan.
-     * Extracting these information from the matrix is not supported currently.
+     * This method can be used to set the view matrix manually. It'll also extract and set #_pos, #_lookAt and #_up from
+     * the matrix. Extracting these information from the matrix is unstable and almost always will result into values
+     * that are differet but results into the same view matrix.
      */
     void setView(const glm::mat4 &mat);
     /*!
@@ -232,6 +233,22 @@ public:
      */
     void setOrthographicProjection(float left=-1, float right=1, float bottom=-1, float top=1, float near=0.1, float far=100);
     /*!
+     * \brief Resets the #projection matrix and the camera's [view](Camera#view) matrix.
+     */
+    void resetViewProjection();
+    /*!
+     * \brief Enables 2D rendering with shaders.
+     * \return A Entity on which things will be drawn.
+     *
+     * This method removes all materials from a scene, resets the matrices with #resetViewProjection, and adds a plane
+     * to the scene. The plane spans between -1 to +1 on x and y axis. You can use the vertex positions for the texture
+     * coordinates. This is intended for experimentation with fragment shaders. You can set a single texture on the
+     * plane to use in your shader.
+     *
+     * \sa render2D
+     */
+    Entity enableCanvas();
+    /*!
      * \brief Set a new #camera for the scene.
      * \param pos The position of the camera.
      * \param lookAt The point the camera looks at.
@@ -242,7 +259,7 @@ public:
      * \brief Set the projection matrix.
      * \param mat The matrix to set.
      */
-    void setProjection(glm::mat4 &mat);
+    void setProjection(const glm::mat4 &mat);
     /*!
      * \brief Set the view matrix (in the #camera).
      * \param mat The matrix to set.
@@ -303,6 +320,16 @@ public:
      */
     bool render();
     /*!
+     * \brief Render the 2D scene.
+     * \return Returns \c false, if the #window should close, \c true otherwise.
+     *
+     * This is an utility method for fast 2D rendering. This is intended to be used with #enableCanvas for running the
+     * shaders. This also sends the resolution and time to the shader.
+     *
+     * \sa enableCanvas render
+     */
+    bool render2D();
+    /*!
      * \brief Get the view-projection matrix.
      * \return The VP part of the MVP matrix.
      */
@@ -353,6 +380,13 @@ void defScrollCB(GLFWwindow* window, double xoffset, double yoffset);
  * a 45 degree FOV and a near and far value of 0.1 and 100 respectively.
  */
 void defWindowSizeCB(GLFWwindow* window, int w, int h);
+/*!
+ * \brief Default callback for OpenGL debug messages.
+ *
+ * Prints the error messages and other relevent info to standard output.
+ */
+void GLAPIENTRY defDebugCB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                           const GLchar *message, const void *userParam);
 }
 
 #endif // SCENE_H

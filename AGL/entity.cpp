@@ -128,7 +128,7 @@ glm::mat4 Entity::getMatM()
         return glm::translate(glm::mat4(), position) * (parent->getMatM() * model);
 }
 
-Material::Material(): ratios(1, -1, -1, -1) {}
+Material::Material(){}//: ratios(1, -1, -1, -1) {}
 Material::Material(float ar, float ag, float ab, float dr, float dg, float db, float sr, float sg, float sb, float sn):
     ambient(ar, ag, ab, 1), diffuse(dr, dg, db, 1), specular(sr, sg, sb, 1), shininess(sn) {}
 Material::~Material()
@@ -208,8 +208,9 @@ void Material::createTexture(const char *path)
 //    tex_channel = other.tex_channel;
 //    texture     = other.texture;
 //}
-void Material::setShader(std::string vertexShader, std::string fragmentShader)
+GLuint Material::setShader(std::string vertexShader, std::string fragmentShader)
 {
+    glDeleteProgram(progID);
     progID = loadShaders(vertexShader, fragmentShader);
     mvpID = glGetUniformLocation(progID, "MVP");
     mID = glGetUniformLocation(progID, "M");
@@ -223,6 +224,7 @@ void Material::setShader(std::string vertexShader, std::string fragmentShader)
         gID = glGetUniformLocation(progID, "shininess");
         vID = glGetUniformLocation(progID, "vpos");
     }
+    return progID;
 }
 
 Light::Light(const glm::vec3 &pos, const glm::vec4 &color): ambient(color), diffuse(color), specular(color), position(pos, 1) {}

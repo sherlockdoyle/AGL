@@ -59,16 +59,20 @@ void saveImage(const char* path, int w, int h);
 
 /*!
  * \name Types of shading
- * These values are used to define how entities will be shaded. **These are currently unused.**
+ * These values are used to define how entities will be shaded.
  * @{
  */
-#define AGL_POINTS 1  //!< Display each vertex as a point.
-#define AGL_LINES 2  //!< Display each edge as a line.
-#define AGL_TRIGS 4  //!< Display each face; this is default.
+#define AGL_POINTS 1  //!< Display each vertex as a point. **Currently unused.**
+#define AGL_LINES 2  //!< Display each edge as a line. **Currently unused.**
+#define AGL_TRIGS 4  //!< Display each face; this is default. **Currently unused.**
 
-#define AGL_SHADING_FLAT 1  //!< Each face will be shaded with a single color.
-#define AGL_SHADING_GOURAUD 2  //!< Each vertex will be shaded.
-#define AGL_SHADING_PHONG 3  //!< Each point (fragment) will be shaded.
+//#define AGL_SHADING_FLAT 1  //!< Each face will be shaded with a single color.
+//#define AGL_SHADING_GOURAUD 2  //!< Each vertex will be shaded.
+//#define AGL_SHADING_PHONG 3  //!< Each point (fragment) will be shaded (Phong shading).
+
+#define AGL_LIGHTING_PHONG 1  //!< Phong lighting model.
+#define AGL_LIGHTING_BLINNPHONG 2  //!< Blinn-Phong lighting model.
+#define AGL_LIGHTING_PBR 3  //!< PBR lighting model.
 /*! @}*/
 
 /*!

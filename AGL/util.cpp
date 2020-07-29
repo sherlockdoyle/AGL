@@ -7,19 +7,19 @@ GLuint loadShaders(std::string vertShader, std::string fragShader)
 {
     GLuint vsID = glCreateShader(GL_VERTEX_SHADER),
            fsID = glCreateShader(GL_FRAGMENT_SHADER);
-    GLint res = GL_FALSE;
-    int logLen;
+    GLint res = 1, logLen;
 
     const char *code = vertShader.c_str();
     glShaderSource(vsID, 1, &code, nullptr);
     glCompileShader(vsID);
     glGetShaderiv(vsID, GL_COMPILE_STATUS, &res);
     glGetShaderiv(vsID, GL_INFO_LOG_LENGTH, &logLen);
-    if(!res || logLen > 0)
+    if(!res)
     {
-        char errMsg[logLen + 1];
-        glGetShaderInfoLog(vsID, logLen, nullptr, &errMsg[0]);
-        printf("Error in loading vertex shader.\n%s\n", errMsg);
+        char errMsg[logLen];
+        glGetShaderInfoLog(vsID, logLen, nullptr, errMsg);
+        fprintf(stderr, "Error in loading vertex shader.\n%s\n", errMsg);
+        return 0;
     }
 
     code = fragShader.c_str();
@@ -27,11 +27,12 @@ GLuint loadShaders(std::string vertShader, std::string fragShader)
     glCompileShader(fsID);
     glGetShaderiv(fsID, GL_COMPILE_STATUS, &res);
     glGetShaderiv(fsID, GL_INFO_LOG_LENGTH, &logLen);
-    if(!res || logLen > 0)
+    if(!res)
     {
-        char errMsg[logLen + 1];
-        glGetShaderInfoLog(vsID, logLen, nullptr, &errMsg[0]);
-        printf("Error in loading fragment shader.\n%s\n", errMsg);
+        char errMsg[logLen];
+        glGetShaderInfoLog(fsID, logLen, nullptr, errMsg);
+        fprintf(stderr, "Error in loading fragment shader.\n%s\n", errMsg);
+        return 0;
     }
 
     GLuint progID = glCreateProgram();
@@ -39,12 +40,13 @@ GLuint loadShaders(std::string vertShader, std::string fragShader)
     glAttachShader(progID, fsID);
     glLinkProgram(progID);
     glGetProgramiv(progID, GL_LINK_STATUS, &res);
-    glGetShaderiv(progID, GL_INFO_LOG_LENGTH, &logLen);
-    if(!res || logLen > 0)
+    glGetProgramiv(progID, GL_INFO_LOG_LENGTH, &logLen);
+    if(!res)
     {
-        char errMsg[logLen + 1];
-        glGetProgramInfoLog(progID, logLen, nullptr, &errMsg[0]);
-        printf("Error in loading program.\n%s\n", errMsg);
+        char errMsg[logLen];
+        glGetProgramInfoLog(progID, logLen, nullptr, errMsg);
+        fprintf(stderr, "Error in loading program.\n%s\n", errMsg);
+        return 0;
     }
     glDetachShader(progID, vsID);
     glDetachShader(progID, fsID);

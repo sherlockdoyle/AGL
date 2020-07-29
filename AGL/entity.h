@@ -51,22 +51,33 @@ class Scene;
 class Material
 {
 public:
-    glm::vec4 emission,    //!< Emission, self color of the material.
-              ambient,     //!< Ambient, color due to ambient light.
-              diffuse,     //!< Diffuse, color when light hits a surface.
-              specular,    //!< Specular, color due to the reflection of light.
-              ratios;  // (color, texture, reflection, refraction) [0, 1] -1: disabled
+    union {
+        glm::vec4 emission,   //!< Emission, self color of the material.
+                  albedo;     //!< Albedo, surface color of the material (for PBR).
+    };
+    glm::vec4 ambient,        //!< Ambient, color due to ambient light.
+              diffuse;        //!< Diffuse, color when light hits a surface.
+    union {
+        glm::vec4 specular;   //!< Specular, color due to the reflection of light.
+        struct {
+            float metallic,   //!< Roughness value for PBR.
+                  roughness,  //!< Metallic value for PBR.
+                  ao,         //!< Ambient Occlusion value for PBR.
+                  f0 = 0.04;  //!< F0 for Fresnel-Schlick approximation
+        };
+    };
+//              ratios;  // (color, texture, reflection, refraction) [0, 1] -1: disabled
     float shininess = 32;   //!< Shininess, amount of light reflected by the material.
     bool lightsEnabled = false,  //!< If true, no lighting calculations are done.
          customShader = false;  //!< If true, Scene#prepare do not create shaders.
-    int shadingType = AGL_SHADING_PHONG,  //!< Type of shading, currently unused. \warning Might be removed.
-        tex_width = -1,  //!< Width of texture,if used.
-        tex_height = -1,  //!< Height of texture, if used.
+    int lightingModel = AGL_LIGHTING_PHONG,  //!< Type of lighting.
+        tex_width   = -1,  //!< Width of texture, if used.
+        tex_height  = -1,  //!< Height of texture, if used.
         tex_channel = -1;  //!< Number of channels in texture, if used.
     GLubyte *texture = nullptr;  //!< Pointer to texture data, if present.
     GLuint progID = 0,  //!< program ID
-           tID = 0,  //!< texture ID
-           mvpID,  //!< MVP matrix ID
+           tID    = 0,  //!< texture ID
+           mvpID,//!< MVP matrix ID
            mID,  //!< model matrix ID
            nID,  //!< normal matrix ID
            eID,  //!< emission color ID
@@ -141,11 +152,12 @@ public:
      * \brief Compile and set the shader for the material.
      * \param vertexShader Vertex shader.
      * \param fragmentShader Fragment shader.
+     * \return The program ID of the loaded program.
      *
      * This can load shaders that were created by #createShader or those loaded manually. This will also set all the
-     * required IDs automatically.
+     * required IDs automatically. If the shader was not set, the return value will be 0.
      */
-    virtual void setShader(std::string vertexShader, std::string fragmentShader);
+    virtual GLuint setShader(std::string vertexShader, std::string fragmentShader);
 
     /*!
      * \defgroup predefined_materials Predefined materials
@@ -156,6 +168,10 @@ public:
                           black_plastic, cyan_plastic, green_plastic, red_plastic, white_plastic, yellow_plastic,
                           black_rubber,  cyan_rubber,  green_rubber,  red_rubber,  white_rubber,  yellow_rubber;
     //! @}
+    enum Type
+    {
+        PHONG, BLINN, PBR
+    };
 private:
     Material(float ar, float ag, float ab, float dr, float dg, float db, float sr, float sg, float sb, float sn);  //!< Used to create the color for the predefined materials quickly.
 };

@@ -1,6 +1,7 @@
 #include "scene.h"
 #include "util.h"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/matrix_inverse.hpp"
 #include "glm/gtx/rotate_vector.hpp"
 #include "glm/gtx/projection.hpp"
 #include<sstream>
@@ -28,7 +29,7 @@ Scene::~Scene()
     if(window)
         glfwDestroyWindow(window);
 }
-void Scene::setProjection(glm::mat4 &mat)
+void Scene::setProjection(const glm::mat4 &mat)
 {
     projection = mat;
 }
@@ -41,6 +42,28 @@ void Scene::setPerspectiveProjection(float fovDeg, float aspectRatio, float near
 void Scene::setOrthographicProjection(float left, float right, float bottom, float top, float near, float far)
 {
     projection = glm::ortho(left, right, bottom, top, near, far);
+}
+void Scene::resetViewProjection()
+{
+    projection = glm::mat4();
+    camera.view = glm::mat4();
+    camera._pos = camera._lookAt = camera._up = glm::vec3();
+}
+Entity Scene::enableCanvas()
+{
+    resetViewProjection();
+    children.clear();
+    Entity e;
+    int verts[] = {-1,-1, 0,    -1, 1, 0,     1,-1, 0,     1, 1, 0},
+        idx[] = {0, 1, 2,     1, 3, 2};
+    e.vertices.assign(verts, verts + 12);
+    e.indices.assign(idx, idx + 6);
+    e.material.customShader = true;
+    children.push_back(&e);
+    e.mergeData();
+    glBindVertexArray(e.VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, e.EBO);
+    return e;
 }
 void Scene::setView(glm::mat4 &mat)
 {
@@ -169,6 +192,16 @@ bool Scene::render()
     glfwPollEvents();
     return glfwWindowShouldClose(window) == 0;
 }
+bool Scene::render2D()
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glUseProgram(entities[0]->material.progID);
+    glBindTexture(GL_TEXTURE_2D, entities[0]->material.tID);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+    return glfwWindowShouldClose(window) == 0;
+}
 void Scene::setCamera(const glm::vec3 &pos, const glm::vec3 &lookAt, const glm::vec3 &up)
 {
     camera = Camera(pos, lookAt, up);
@@ -248,10 +281,11 @@ void Camera::setUp(float x, float y, float z)
 void Camera::setView(const glm::mat4 &mat)
 {
     view = mat;
-    // TODO: Implement extraction
-    _pos = glm::vec3(std::nanf(""));
-    _lookAt = glm::vec3(std::nanf(""));
-    _up = glm::vec3(std::nanf(""));
+    glm::mat4 inv = glm::inverse(mat);
+    glm::vec3 zaxs(-inv[2]);
+    _pos = glm::vec3(inv[3]);
+    _lookAt = zaxs + _pos;
+    _up = glm::cross(glm::vec3(inv[0]), zaxs) / glm::dot(zaxs, zaxs);
 }
 void Camera::rotate(float rad, const glm::vec3 &axis, bool around)
 {
@@ -416,5 +450,11 @@ void defWindowSizeCB(GLFWwindow *window, int w, int h)
     scene->width = w;
     scene->height = h;
     scene->projection = glm::perspective(glm::radians(45.f), float(w)/h, 0.1f, 100.f);
+}
+void GLAPIENTRY defDebugCB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                           const GLchar *message, const void *userParam)
+{
+    printf("%s: from 0x%x, type 0x%x, severity = 0x%x, message(0x%x) = %s\n",
+           (type==GL_DEBUG_TYPE_ERROR ? "ERROR" : "Debug"), source, type, severity, id, message);
 }
 }
